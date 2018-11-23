@@ -1,4 +1,32 @@
-<?php include_once("_strings.php" );?>
+<?php include_once("_strings.php" );
+
+
+$seg = $input->urlSegment(1);
+if($seg == "children"){
+    $resp = array();
+    $dibujo = $pages->find("template=dibujo")->last();
+    if($dibujo->numChildren() > 0){
+
+        $children = $dibujo->children();
+        foreach ($children as $child) {
+            $temp = array();
+            $temp["puntos"] = $child->puntos;
+            if($child->offsetx){
+                $temp["offset"] = array($child->offsetx, $child->offsety);
+            }else{
+                $temp["offset"] = array(0,0);
+            }
+            $temp["userName"] = $child->title;
+            $resp[] = $temp;
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($resp, true);
+        exit;
+    }
+}
+?>
+
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -16,6 +44,10 @@
     <div id="container">
         <a href="dibujo1"><h1><?php _t("make a drawing");?></h1></a>
         <h2><?php _t("keep the chain going");?></h2>
+
+        <div id="safe-area">
+
+        </div>
 
     </div>
 

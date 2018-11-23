@@ -24,10 +24,9 @@ $(document).ready(function(){
     prev = $.get("prev",function( data ) {
         data.puntos = JSON.parse( data.puntos );
         prev = data;
-        console.log(prev);
+        // console.log(prev);
         myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
-
 })
 
 window.addEventListener("resize", onResize);
@@ -60,12 +59,8 @@ function onResize(){
     isSetup = false;
 }
 
-var difx, dify;
 
 var sketch = function( p ) {
-
-  var x = 100;
-  var y = 100;
 
   p.setup = function() {
       console.log("p5 started");

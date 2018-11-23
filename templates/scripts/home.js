@@ -21,10 +21,9 @@ $.cssHooks.backgroundColor = {
 var myp5, prev;
 
 $(document).ready(function(){
-    prev = $.get("prev",function( data ) {
-        data.puntos = JSON.parse( data.puntos );
+    prev = $.get("children",function( data ) {
         prev = data;
-        console.log(prev);
+        // console.log(prev);
         myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
 
@@ -36,12 +35,6 @@ var safeArea;
 var squareSide;
 var myCanvas;
 var isSetup = true;
-var bgColor = $("body").css("background-color");
-var hslBgColor = hexToHSL(bgColor);
-hslBgColor.h *= 360;
-hslBgColor.s *= 100;
-hslBgColor.l *= 100;
-var startLightness = hslBgColor.l;
 
 function onResize(){
     let safeWidth = safeArea.width();
@@ -64,9 +57,6 @@ var difx, dify;
 
 var sketch = function( p ) {
 
-  var x = 100;
-  var y = 100;
-
   p.setup = function() {
       console.log("p5 started");
       safeArea = $("#safe-area");
@@ -77,27 +67,41 @@ var sketch = function( p ) {
       tile.id('tile');
       tile.parent("safe-area");
       myCanvas = $('#tile');
+      p.scale(0.2,0.2);
+      // Los dibjo todos, conectados
+      if(prev.length>0){
+          p.translate(squareSide/2,squareSide/2);
 
-      // Dibujo el tile anterior.
-      // Pero lo ubico de forma que el ultimo punto quede en el medio
-      if(prev.puntos.length>0){
-          let lastPoint = prev.puntos[prev.puntos.length-1];
-          difx =  (squareSide/2) -lastPoint[0];
-          dify = (squareSide/2) -  lastPoint[1];
-          p.translate(difx, dify);
+          for(let i = 0; i < prev.length; i++){
 
-          for(let i = 0; i < prev.puntos.length-1; i++){
-              p.line(
-                prev.puntos[i][0],prev.puntos[i][1],
-                prev.puntos[i+1][0],prev.puntos[i+1][1],
-              );
+                let puntos = JSON.parse( prev[i].puntos );
+                p.translate(-prev[i].offset[0], -prev[i].offset[1]); // no se bien por que tengo que hacerlo negativo pero funciona
+                p.fill('rgba(255,255,255, 0.5)');
+                p.textSize(40);
+                // p.text(prev[i].userName,squareSide/2,squareSide/2); // mostrar el nombre del que lo dibujo
+                for(let j = 0; j < puntos.length-1; j++){
+                    p.line(
+                      puntos[j][0],puntos[j][1],
+                      puntos[j+1][0],puntos[j+1][1],
+                    );
+                }
           }
+
+          // let lastPoint = prev.puntos[prev.puntos.length-1];
+          // difx =  (squareSide/2) -lastPoint[0];
+          // dify = (squareSide/2) -  lastPoint[1];
+          // p.translate(difx, dify);
+          //
+          // for(let i = 0; i < prev.puntos.length-1; i++){
+          //     p.line(
+          //       prev.puntos[i][0],prev.puntos[i][1],
+          //       prev.puntos[i+1][0],prev.puntos[i+1][1],
+          //     );
+          // }
           p.resetMatrix();
 
 
       }
-      p.fill(0);
-      p.ellipse(squareSide/2,squareSide/2,4);
 
 
   };
@@ -112,53 +116,53 @@ var sketch = function( p ) {
 
 
   p.draw = function() {
-
-    p.stroke(255);
-    p.strokeWeight(1)
-
-    var mouseXoff = p.mouseX - 5;
-    var mouseYoff = p.mouseY - 5;
-
-    if (p.mouseIsPressed === true && !hasDrawn) {
-        if(!isDrawing){
-            let startVec = p.createVector(mouseXoff, mouseYoff);
-            let centerVec = p.createVector(squareSide/2, squareSide/2);
-            let dist  = startVec.dist(centerVec);
-            if(dist>5) return;
-
-            p.startTime = new Date().getTime();
-        }
-        isDrawing = true;
-        $("#starthere").hide();
-
-        if(mouseXoff != prevX || mouseYoff != prevY){
-            if(mouseXoff > 0 && mouseXoff < squareSide && mouseYoff > 0 && mouseYoff < squareSide){
-                if(ink > 0){
-                    p.puntos.push( [mouseXoff, mouseYoff]);
-                    // console.log(puntos);
-                    p.line(mouseXoff, mouseYoff, prevX, prevY);
-                    prevX = mouseXoff;
-                    prevY = mouseYoff;
-                    ink--;
-                    hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
-                    let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
-                    $("body").css("background-color", colorString);
-                }else{
-                    if(!hasDrawn){
-                        EndDrawing();
-                        hasDrawn = true;
-                    }
-
-                }
-            }
-        }
-    }else{
-        if(isDrawing && !hasDrawn){
-            EndDrawing();
-            hasDrawn  = true;
-            isDrawing = false;
-        }
-    }
+  //
+  //   p.stroke(255);
+  //   p.strokeWeight(1)
+  //
+  //   var mouseXoff = p.mouseX - 5;
+  //   var mouseYoff = p.mouseY - 5;
+  //
+  //   if (p.mouseIsPressed === true && !hasDrawn) {
+  //       if(!isDrawing){
+  //           let startVec = p.createVector(mouseXoff, mouseYoff);
+  //           let centerVec = p.createVector(squareSide/2, squareSide/2);
+  //           let dist  = startVec.dist(centerVec);
+  //           if(dist>5) return;
+  //
+  //           p.startTime = new Date().getTime();
+  //       }
+  //       isDrawing = true;
+  //       $("#starthere").hide();
+  //
+  //       if(mouseXoff != prevX || mouseYoff != prevY){
+  //           if(mouseXoff > 0 && mouseXoff < squareSide && mouseYoff > 0 && mouseYoff < squareSide){
+  //               if(ink > 0){
+  //                   p.puntos.push( [mouseXoff, mouseYoff]);
+  //                   // console.log(puntos);
+  //                   p.line(mouseXoff, mouseYoff, prevX, prevY);
+  //                   prevX = mouseXoff;
+  //                   prevY = mouseYoff;
+  //                   ink--;
+  //                   hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
+  //                   let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
+  //                   $("body").css("background-color", colorString);
+  //               }else{
+  //                   if(!hasDrawn){
+  //                       EndDrawing();
+  //                       hasDrawn = true;
+  //                   }
+  //
+  //               }
+  //           }
+  //       }
+  //   }else{
+  //       if(isDrawing && !hasDrawn){
+  //           EndDrawing();
+  //           hasDrawn  = true;
+  //           isDrawing = false;
+  //       }
+  //   }
 
   };
 };
