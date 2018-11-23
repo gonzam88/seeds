@@ -86,7 +86,7 @@ var sketch = function( p ) {
           p.translate(difx, dify);
 
           for(let i = 0; i < prev.puntos.length-1; i++){
-              p.stroke(p.map(i, prev.puntos.length-250, prev.puntos.length,255, 200),);
+              p.stroke(230);
               p.line(
                 prev.puntos[i][0],prev.puntos[i][1],
                 prev.puntos[i+1][0],prev.puntos[i+1][1],
@@ -108,7 +108,7 @@ var sketch = function( p ) {
   p.puntos = [];
   var isDrawing = false;
   var hasDrawn = false;
-  var startInk = 500;
+  var startInk = 400;
   var ink = startInk;
 
 
