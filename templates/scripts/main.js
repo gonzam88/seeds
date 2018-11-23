@@ -59,6 +59,8 @@ function onResize(){
     isSetup = false;
 }
 
+var difx = 0;
+var dify = 0;
 
 var sketch = function( p ) {
 
