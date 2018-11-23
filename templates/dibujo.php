@@ -78,7 +78,7 @@ if($seg == "prev"){
     <div id="container">
 
         <h1><?php _t("make a drawing");?></h1>
-        <h2><?php _t("keep the chain going");?></h2>
+        <a href="/"><h2><?php _t("keep the chain going");?></h2></a>
         <p><?php _t("generate seeds");?> <a href="#">(??)</a></p>
 
         <div id="safe-area">
@@ -96,8 +96,8 @@ if($seg == "prev"){
         </div>
 
         <div class="signyourwork">
-            <p><?php _t("sign your work");?></p>
-            <input id="userName" type="text" maxlength="6"  />
+            <!--<p><?php _t("sign your work");?></p>-->
+            <input id="userName" type="text" maxlength="6"  placeholder="<?php _t("sign");?>"/>
             <button id="savework" disabled><?php _t("save");?></button>
         </div>
     </div>

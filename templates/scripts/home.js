@@ -67,6 +67,8 @@ var sketch = function( p ) {
       tile.id('tile');
       tile.parent("safe-area");
       myCanvas = $('#tile');
+
+      p.background(255)
       p.scale(0.2,0.2);
       // Los dibjo todos, conectados
       if(prev.length>0){

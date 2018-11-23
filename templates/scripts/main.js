@@ -75,6 +75,8 @@ var sketch = function( p ) {
       tile.parent("safe-area");
       myCanvas = $('#tile');
 
+      p.background(255);
+
       // Dibujo el tile anterior.
       // Pero lo ubico de forma que el ultimo punto quede en el medio
       if(prev.puntos.length>0){
@@ -84,6 +86,7 @@ var sketch = function( p ) {
           p.translate(difx, dify);
 
           for(let i = 0; i < prev.puntos.length-1; i++){
+              p.stroke(p.map(i, prev.puntos.length-250, prev.puntos.length,255, 200),);
               p.line(
                 prev.puntos[i][0],prev.puntos[i][1],
                 prev.puntos[i+1][0],prev.puntos[i+1][1],
@@ -93,6 +96,7 @@ var sketch = function( p ) {
 
 
       }
+      p.stroke(0);
       p.fill(0);
       p.ellipse(squareSide/2,squareSide/2,4);
 
@@ -110,7 +114,7 @@ var sketch = function( p ) {
 
   p.draw = function() {
 
-    p.stroke(255);
+    p.stroke(0);
     p.strokeWeight(1)
 
     var mouseXoff = p.mouseX - 5;
@@ -137,9 +141,9 @@ var sketch = function( p ) {
                     prevX = mouseXoff;
                     prevY = mouseYoff;
                     ink--;
-                    hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
-                    let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
-                    $("body").css("background-color", colorString);
+
+
+
                 }else{
                     if(!hasDrawn){
                         EndDrawing();
@@ -155,8 +159,11 @@ var sketch = function( p ) {
             hasDrawn  = true;
             isDrawing = false;
         }
-    }
+    };
 
+    hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
+    let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
+    $("body").css("background-color", colorString);
   };
 };
 

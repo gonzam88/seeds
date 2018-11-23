@@ -6,7 +6,7 @@ function _t($label) {
     'keep the chain going'  => 'seguí la cadena',
     'generate seeds'        => 'generá semillas',
     '<- start here'         => '<- empezá acá',
-    'sign your work'        => 'firmá tu obra',
+    'sign your work'        => 'firmá',
     'is it ok now?'         => 'te parece bien?',
     'save'                  => 'guardar',
     'yes'                   => 'si'
