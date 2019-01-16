@@ -31,9 +31,7 @@ footer, header, hgroup, menu, nav, section {
 body {
 	line-height: 1;
 }
-ol, ul {
-	list-style: none;
-}
+
 blockquote, q {
 	quotes: none;
 }
@@ -78,6 +76,10 @@ a{
     left: 0;
     right: 0;
     border: 5px solid #533fb7;
+	z-index: 10;
+}
+.soyArtista #tile{
+	border: 5px solid #61deb6;
 }
 
 #container{
@@ -94,10 +96,11 @@ a{
 	justify-content: center;
 	text-align: center;
 	background-color: #ffffff87;
+	z-index: 20;
 }
 #restart a{
 	color: white;
-    background-color: #43ecb6;
+    background-color: #61deb6;
     border-radius: 40px;
     padding: 20px;
 }
@@ -112,6 +115,7 @@ a{
     align-items: center;
 	justify-content: center;
 	text-align: center;
+	z-index: 20;
 }
 
 .hide{
@@ -181,4 +185,29 @@ button:hover{
 .conectionError.visible{
 	transition: opacity linear 0s;
 	opacity: 100;
+}
+
+#playersQueue {
+    width: 150px;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+	z-index: 1;
+}
+#playersQueue div{
+	text-align: center;
+    color: white;
+}
+#playersQueue ol{
+	list-style-position: inside;
+}
+#playersQueue li, #playersQueue div{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+
+.soyyo{
+	font-weight: bold
 }

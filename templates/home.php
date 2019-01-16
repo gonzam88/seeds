@@ -36,7 +36,7 @@ if($seg == "children"){
   <meta name="author" content="gonzalo moiguer">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Space+Mono:400,700" rel="stylesheet">
   <link rel="stylesheet" href="<?php echo $config->urls->templates; ?>styles/main.css?v=1.0">
 
 </head>
@@ -54,11 +54,10 @@ if($seg == "children"){
     </div>
 
     <div id="playersQueue">
-      <ol>
-        <li v-for="player in players">
-          {{ player[0] }}
-        </li>
-      </ol>
+        <div v-bind:class="artist[2] ">{{artist[0]}}</div>
+        <ol start="2">
+            <li v-for="player in players"  v-bind:class="player[2]">{{ player[0] }}</li>
+        </ol>
     </div>
 
     <div id="restart" class="hide">

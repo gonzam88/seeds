@@ -36,14 +36,21 @@ var login = new Vue({
 })
 
 var playersQueue = new Vue({
-  el: '#playersQueue',
-  data: {
-    players: []
-  }
+    el: '#playersQueue',
+    data: {
+        myId: "",
+        artist: "",
+        players: []
+    },
+    computed: {
+        isitme: function(){
+            return "soyyo"
+        }
+    }
 })
 
 var myp5, prev;
-var myid, nickname;
+var myid, nickname, queuePos;
 var ws;
 var soyArtista = false;
 var playersLines = [];
@@ -55,9 +62,6 @@ function GetStatus(){
 }
 
 $(document).ready(function(){
-
-
-
     // start
     // Cargo el nombre ya guardado
     if(localStorage.getItem("nickname")){
@@ -94,12 +98,19 @@ $(document).ready(function(){
         switch(data.action){
             case "login":
                 myid = data.id;
+                playersQueue.myId = data.id;
                 localStorage.setItem("nickname", login.nickname);
                 $("#formulario").addClass("hide");
                 $("#restart").addClass("hide");
             break;
             case "queuelist":
+                for(let i = 0; i < data.players.length; i++){
+                    if(data.players[i][1] == myid) data.players[i].push("soyyo")
+                    queuePos = i+1;
+                }
+                if(data.artist[1] == myid ) data.artist.push("soyyo")
                 playersQueue.players = data.players
+                playersQueue.artist = data.artist
             break;
 
             case "sosartista":
@@ -163,12 +174,14 @@ function StartArtistTime(){
     console.log("Ahora dibujo yo");
     soyArtista = true;
     $("canvas:hover").css("cursor","crosshair");
+    $("body").addClass("soyArtista");
 }
 
 function EndArtistTime(){
     console.log("Terminé mi dibujo")
     soyArtista = false;
     $("#restart").removeClass("hide");
+    $("body").removeClass("soyArtista");
 }
 
 
@@ -359,67 +372,6 @@ var sketch = function( p ) {
 
 }; // p.draw
 }; // sketch
-
-
-
-
-
-function EndDrawing(){
-    isDrawing = false;
-    hasDrawn = true;
-
-    let endTime = new Date().getTime();
-    let elapsedTime =  endTime - myp5.startTime;
-    elapsedTime /= 1000;
-
-    $(".formulario-final").removeClass('hide');
-    $(".isitok").show();
-    $(".signyourwork").hide();
-    document.getSelection().removeAllRanges(); // esto deselecciona todo lo que este seleccionado
-
-    $("#itsnotok").click(function(){
-        location.reload();
-    })
-
-    $("#itsok").click(function(){
-        $(".isitok").hide();
-        $(".signyourwork").show();
-
-        $("#userName").keyup(function(){
-            let count = $(this).val().length;
-            if(count > 2){
-                $("#savework").prop("disabled", false);
-
-            }else{
-                $("#savework").prop("disabled", true);
-            }
-        })
-        let hasSent = false;
-
-        $("#savework").click(function(){
-            if(hasSent) return;
-            hasSent = true;
-
-            console.log("saving");
-            $.post( window.location, {
-                action      : "newtile",
-                userName    : $("#userName").val(),
-                elapsedTime : elapsedTime,
-                offsetx     : difx,
-                offsety     : dify,
-                puntos      : JSON.stringify(myp5.puntos)
-
-            }).done(function( data ) {
-                  console.log( data );
-                  if(data.status == "ok"){
-                      location.reload();
-                  }
-            });
-
-        })
-    })
-}
-
 
 
 function mousePressed () {
