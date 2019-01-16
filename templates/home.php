@@ -43,8 +43,8 @@ if($seg == "children"){
 <body>
 
     <div id="container">
-        <a href="dibujo1"><h1><?php _t("make a drawing");?></h1></a>
-        <h2><?php _t("keep the chain going");?></h2>
+        <h1><?php _t("paint irl");?></h1>
+        <!-- <h2><?php _t("keep the chain going");?></h2> -->
 
         <div id="safe-area">
 
@@ -62,10 +62,15 @@ if($seg == "children"){
 
 
     <div id="formulario">
+
         <div class="signyourwork">
+            <h1><?php _t("paint irl");?></h1>
             <!--<p><?php _t("sign your work");?></p>-->
             <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:input="changed"/>
             <button id="comenzar" disabled><?php _t("draw");?></button>
+            <div class="conectionError">
+                <?php _t("connection error") ?>
+            </div>
         </div>
     </div>
 

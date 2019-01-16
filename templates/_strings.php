@@ -11,8 +11,9 @@ function _t($label) {
     'is it ok now?'         => 'te parece bien?',
     'save'                  => 'guardar',
     'yes'                   => 'si',
-    'draw'                 => 'dibujar',
-    'your name'             => 'tu nombre'
+    'draw'                  => 'dibujar',
+    'your name'             => 'tu nombre',
+    'connection error'      => 'error de conexión'
 
   );
   echo isset($labels[$label]) ? $labels[$label] : $label;

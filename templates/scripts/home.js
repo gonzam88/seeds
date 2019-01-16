@@ -42,11 +42,11 @@ var playersQueue = new Vue({
   }
 })
 
-
 var myp5, prev;
-var nickname;
+var myid, nickname;
 var ws;
 var soyArtista = false;
+var playersLines = [];
 
 function GetStatus(){
     ws.send(JSON.stringify({action:"status"}))
@@ -54,21 +54,35 @@ function GetStatus(){
 
 $(document).ready(function(){
 
-    // socket connection
+
+
+    // start
+    // Cargo el nombre ya guardado
+    if(localStorage.getItem("nickname")){
+        login.nickname = localStorage.getItem("nickname");
+        login.changed();
+    }
+
     var HOST = location.origin.replace(/^http/, 'ws')
     HOST = "ws://localhost:3000";
 
     ws = new WebSocket(HOST);
-
     // Connection opened
     ws.addEventListener('open', function (event) {
-        //
+
+        //$("#formulario").addClass("hide");
     });
     ws.addEventListener('close', function (event) {
         $("#formulario").removeClass("hide");
     });
     ws.addEventListener('error', function (event) {
         $("#formulario").removeClass("hide");
+        // Show & hide error
+        $(".conectionError").addClass("visible").delay(1000).queue(function(next){
+            $(this).removeClass('visible');
+            next();
+        });
+        //console.log("Error", event)
     });
     // Listen for messages
     ws.addEventListener('message', function (event) {
@@ -76,6 +90,11 @@ $(document).ready(function(){
         console.log("Server:", data);
 
         switch(data.action){
+            case "login":
+                myid = data.id;
+                localStorage.setItem("nickname", login.nickname);
+                $("#formulario").addClass("hide");
+            break;
             case "queuelist":
                 playersQueue.players = data.players
             break;
@@ -85,9 +104,11 @@ $(document).ready(function(){
             break;
 
             case "linestart":
+                playersLines.push([]);
             break;
 
             case "vertex":
+                playersLines[playersLines.length-1].push([data.x, data.y]);
             break;
 
             case "lineend":
@@ -96,34 +117,22 @@ $(document).ready(function(){
 
     });
 
-    // start
-    // Cargo el nombre ya guardado
-    if(localStorage.getItem("nickname")){
-        login.nickname = localStorage.getItem("nickname");
-        login.changed();
-    }
-
     $("#comenzar").click(function(){
-        localStorage.setItem("nickname", login.nickname);
-        $("#formulario").addClass("hide");
-
-        let logInData = {
-            action: "login",
-            nickname: login.nickname
-        };
-        logInData = JSON.stringify(logInData);
-        if(!ws) return;
-        ws.send(logInData);
+        // socket connection
+        if (ws.readyState === ws.OPEN) {
+            let msg = {
+                action: "login",
+                nickname: login.nickname
+            };
+            ws.send(JSON.stringify(msg));
+        }
     });
-
 
     prev = $.get("children",function( data ) {
         prev = data;
         // console.log(prev);
         myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
-
-
 })
 
 function StartArtistTime(){
@@ -146,6 +155,12 @@ var squareSide;
 var myCanvas;
 var isSetup = true;
 
+var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
+var initialCanvasSize; // Este es fijo desde el principio. Lo uso para escalar los valores normalizados. Por cuando resizeas la pantalla, el canvas no se modifica, solo zoomea o comprime
+
+var mXpos; // Mouse relative to canvas
+var mYpos;
+
 
 function onResize(){
     let safeWidth = safeArea.width();
@@ -161,6 +176,9 @@ function onResize(){
         myCanvas.css("width", squareSide);
         myCanvas.css("height", squareSide);
     }
+
+    canvasInnerSize = $("canvas").innerWidth();
+
     isSetup = false;
 }
 
@@ -169,7 +187,6 @@ var difx, dify;
 var sketch = function( p ) {
 
   p.setup = function() {
-      console.log("p5 started");
       safeArea = $("#safe-area");
 
       onResize();
@@ -182,93 +199,145 @@ var sketch = function( p ) {
       p.background(255)
       p.scale(0.2,0.2);
 
+      canvasInnerSize = $("canvas").innerWidth();
+      initialCanvasSize = canvasInnerSize;
+
+      function findObjectCoords(mouseEvent)
+      {
+        var obj = document.getElementById("tile");
+        var obj_left = 0;
+        var obj_top = 0;
+
+        while (obj.offsetParent)
+        {
+          obj_left += obj.offsetLeft;
+          obj_top += obj.offsetTop;
+          obj = obj.offsetParent;
+        }
+        if (mouseEvent)
+        {
+          //FireFox
+          mXpos = mouseEvent.pageX;
+          mYpos = mouseEvent.pageY;
+        }
+        else
+        {
+          //IE
+          mXpos = window.event.x + document.body.scrollLeft - 2;
+          mYpos = window.event.y + document.body.scrollTop - 2;
+        }
+        mXpos -= obj_left;
+        mYpos -= obj_top;
+        // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
+        //console.log(mXpos, mYpos)
+      }
+      document.getElementById("tile").onmousemove = findObjectCoords;
+
   };
 
   var cnt = 0;
   var prevX, prevY;
   p.puntos = [];
-  var isDrawing = false;
+  var startedDrawing = false;
   var hasDrawn = false;
-  var startInk = 500;
+  var startInk = 9999500; // TODO server side
   var ink = startInk;
+  var linesDetail = 4; // Menos es màs detalle y más puntos
 
   p.lineas = []
   var newLine = false;
 
   p.draw = function() {
 
-      // Mi dibujo
-      if(!soyArtista) return;
-      p.stroke(0);
-      p.strokeWeight(1)
+      // Calculos de mi dibujo
+      if(soyArtista){
+          var normalX = p.map(mXpos, 0, canvasInnerSize, 0, 1)
+          var normalY = p.map(mYpos, 0, canvasInnerSize, 0, 1)
 
-      var mouseXoff = p.mouseX - 5;
-      var mouseYoff = p.mouseY - 5;
+          if (p.mouseIsPressed === true && !hasDrawn) {
 
-      if (p.mouseIsPressed === true && !hasDrawn) {
+            if(!startedDrawing){
+                p.startTime = new Date().getTime();
+                startedDrawing = true;
+            }
+            let newPosVec = p.createVector(normalX, normalY);
+            let oldPosVec = p.createVector(prevX, prevY);
+            let movement  = newPosVec.dist(oldPosVec);
+            if(movement < linesDetail){
+                // Evito dibujar si el movimiento es poco
+                if(normalX != prevX || normalY != prevY){
+                    // Evito dibujar si el mouse no se movio
+                    if(ink > 0){
+                        let decimalDetail = 8;
+                        if(newLine){
+                            ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
+                            p.lineas.push([])
+                            newLine = false;
+                        }else{
+                            ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
+                            p.lineas[p.lineas.length-1].push([normalX, normalY]);
+                        }
+                        prevX = normalX;
+                        prevY = normalY;
+                        ink--;
 
-        // if(!isDrawing){
-        let startVec = p.createVector(mouseXoff, mouseYoff);
-        let centerVec = p.createVector(squareSide/2, squareSide/2);
-        let dist  = startVec.dist(centerVec);
-        //if(dist>5) return;
-
-        p.startTime = new Date().getTime();
-
-        // }
-        isDrawing = true;
-        $("#starthere").hide();
-
-        if(mouseXoff != prevX || mouseYoff != prevY){
-            if(mouseXoff > 0 && mouseXoff < squareSide && mouseYoff > 0 && mouseYoff < squareSide){
-                if(ink > 0){
-                    if(newLine){
-                        ws.send(JSON.stringify({action:"linestart", x:mouseXoff, y: mouseYoff}))
-                        p.lineas.push([])
-                        newLine = false;
                     }else{
-                        ws.send(JSON.stringify({action:"vertex", x:mouseXoff, y: mouseYoff}))
-                        p.lineas[p.lineas.length-1].push([mouseXoff, mouseYoff]);
-                        p.line(mouseXoff, mouseYoff, prevX, prevY);
+                        if(!hasDrawn){
+                            hasDrawn = true;
+                        }
                     }
-
-                    // console.log(p.lineas)
-
-
-                    //p.puntos.push( [mouseXoff, mouseYoff]);
-                    // console.log(puntos);
-
-
-                    prevX = mouseXoff;
-                    prevY = mouseYoff;
-                    ink--;
-                    // hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
-                    // let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
-                    // $("body").css("background-color", colorString);
-                }else{
-                    if(!hasDrawn){
-                        //EndDrawing();
-                        hasDrawn = true;
-                    }
-
                 }
+            } // lines detail
+        }else{
+            if(!newLine){
+                newLine = true;
+                ws.send(JSON.stringify({action:"lineend"}))
+            }
+
+        }
+    } // if soy artista
+
+    //
+    // RENDERS
+    p.background(255)
+    p.stroke(0);
+    p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 2))
+
+    // Render Dibujos de los otros
+    if(playersLines.length>0){
+        for(let i = 0; i < playersLines.length; i++){
+            // Linea
+            for(let j = 0; j < playersLines[i].length-1; j++){
+                p.line(
+                  playersLines[i][j][0] * initialCanvasSize,    // x1
+                  playersLines[i][j][1] * initialCanvasSize,    // y2
+                  playersLines[i][j+1][0] * initialCanvasSize,  // x2
+                  playersLines[i][j+1][1] * initialCanvasSize,  // y2
+                );
             }
         }
-    }else{
-        if(!newLine){
-            newLine = true;
-            ws.send(JSON.stringify({action:"lineend"}))
-        }
-
-        // if(isDrawing && !hasDrawn){
-        //     EndDrawing();
-        //     hasDrawn  = true;
-        //     isDrawing = false;
-        // }
     }
 
-  };
-};
+    // Render mi Dibujo
+    if(p.lineas.length > 0){
+        for(let i = 0; i < p.lineas.length; i++){
+            for(let j = 0; j < p.lineas[i].length-1; j++){
+                p.line(
+                    p.lineas[i][j][0] * initialCanvasSize,  // x1
+                    p.lineas[i][j][1] * initialCanvasSize,  // y1
+                    p.lineas[i][j+1][0] * initialCanvasSize,// x2
+                    p.lineas[i][j+1][1] * initialCanvasSize,// y2
+                );
+            }
+        }
+    }
+
+
+}; // p.draw
+}; // sketch
+
+
+
 
 
 function EndDrawing(){

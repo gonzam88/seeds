@@ -99,8 +99,9 @@ a{
 .hide{
 	display: none !important;
 }
-#signyourwork h1{
-	margin-bottom: 10px;
+.signyourwork h1{
+	margin-bottom: 60px;
+	font-size: 20px;
 }
 #itsnotok, #itsok{
 	margin: 0px 20px;
@@ -152,6 +153,14 @@ button:hover{
 	transform: rotate(20deg);
 	color: #6e4fe0;
 }
-canvas:hover{
-	/* cursor: wait; */
+
+.conectionError{
+	color: #ff007d;
+	opacity: 0;
+	transition: opacity ease-out .4s;
+}
+
+.conectionError.visible{
+	transition: opacity linear 0s;
+	opacity: 100;
 }
