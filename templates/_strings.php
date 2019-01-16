@@ -13,7 +13,8 @@ function _t($label) {
     'yes'                   => 'si',
     'draw'                  => 'dibujar',
     'your name'             => 'tu nombre',
-    'connection error'      => 'error de conexión'
+    'connection error'      => 'error de conexión',
+    'start again'           => 'volver a dibujar',
 
   );
   echo isset($labels[$label]) ? $labels[$label] : $label;

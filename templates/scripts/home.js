@@ -47,6 +47,8 @@ var myid, nickname;
 var ws;
 var soyArtista = false;
 var playersLines = [];
+var currArtistInk;
+
 
 function GetStatus(){
     ws.send(JSON.stringify({action:"status"}))
@@ -94,6 +96,7 @@ $(document).ready(function(){
                 myid = data.id;
                 localStorage.setItem("nickname", login.nickname);
                 $("#formulario").addClass("hide");
+                $("#restart").addClass("hide");
             break;
             case "queuelist":
                 playersQueue.players = data.players
@@ -102,13 +105,22 @@ $(document).ready(function(){
             case "sosartista":
                 StartArtistTime()
             break;
+            case "stopartista":
+                EndArtistTime()
+            break;
 
             case "linestart":
                 playersLines.push([]);
             break;
 
             case "vertex":
-                playersLines[playersLines.length-1].push([data.x, data.y]);
+                currArtistInk = data.ink;
+                if(soyArtista){
+                    if(currArtistInk <= 0) EndArtistTime()
+                }else{
+                    playersLines[playersLines.length-1].push([data.x, data.y]);
+
+                }
             break;
 
             case "lineend":
@@ -128,6 +140,18 @@ $(document).ready(function(){
         }
     });
 
+    $("#restart a").click(function(){
+        // socket connection
+        if (ws.readyState === ws.OPEN) {
+            let msg = {
+                action: "login",
+                nickname: login.nickname
+            };
+            ws.send(JSON.stringify(msg));
+        }
+    })
+
+
     prev = $.get("children",function( data ) {
         prev = data;
         // console.log(prev);
@@ -144,7 +168,7 @@ function StartArtistTime(){
 function EndArtistTime(){
     console.log("Terminé mi dibujo")
     soyArtista = false;
-    $("canvas:hover").css("cursor","wait")
+    $("#restart").removeClass("hide");
 }
 
 

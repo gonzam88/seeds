@@ -35,6 +35,7 @@ if($seg == "children"){
   <meta name="description" content="Storing Seeds From Drawings for Drawings">
   <meta name="author" content="gonzalo moiguer">
 
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <link rel="stylesheet" href="<?php echo $config->urls->templates; ?>styles/main.css?v=1.0">
 
@@ -60,12 +61,14 @@ if($seg == "children"){
       </ol>
     </div>
 
+    <div id="restart" class="hide">
+        <a title="<?php _t("start again") ?>" href="#"><i class="fas fa-undo-alt fa-2x"></i></a>
+    </div>
 
     <div id="formulario">
 
         <div class="signyourwork">
             <h1><?php _t("paint irl");?></h1>
-            <!--<p><?php _t("sign your work");?></p>-->
             <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:input="changed"/>
             <button id="comenzar" disabled><?php _t("draw");?></button>
             <div class="conectionError">

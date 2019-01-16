@@ -83,6 +83,24 @@ a{
 #container{
 	padding: 5px;
 }
+#restart{
+	position: absolute;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	text-align: center;
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	text-align: center;
+	background-color: #ffffff87;
+}
+#restart a{
+	color: white;
+    background-color: #43ecb6;
+    border-radius: 40px;
+    padding: 20px;
+}
 
 #formulario{
 	background-color: #e2e2e2;
