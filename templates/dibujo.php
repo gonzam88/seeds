@@ -105,7 +105,7 @@ if($seg == "prev"){
 
     <script src="<?php echo $config->urls->templates; ?>dependencies/jquery-3.1.1.min.js"></script>
     <script src="<?php echo $config->urls->templates; ?>dependencies/p5.min.js"></script>
-    <script src="<?php echo $config->urls->templates; ?>scripts/main.js?v=1.0"></script>
+    <script src="<?php echo $config->urls->templates; ?>scripts/dibujo.js?v=1.0"></script>
 
 </body>
 </html>

@@ -192,15 +192,15 @@ function EndDrawing(){
         $("#userName").keyup(function(){
             let count = $(this).val().length;
             if(count > 2){
-                $("#savework").prop("disabled", false);
+                $("#comenzar").prop("disabled", false);
 
             }else{
-                $("#savework").prop("disabled", true);
+                $("#comenzar").prop("disabled", true);
             }
         })
         let hasSent = false;
 
-        $("#savework").click(function(){
+        $("#comenzar").click(function(){
             if(hasSent) return;
             hasSent = true;
 

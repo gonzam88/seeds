@@ -41,6 +41,7 @@ if($seg == "children"){
 </head>
 
 <body>
+
     <div id="container">
         <a href="dibujo1"><h1><?php _t("make a drawing");?></h1></a>
         <h2><?php _t("keep the chain going");?></h2>
@@ -51,9 +52,29 @@ if($seg == "children"){
 
     </div>
 
+    <div id="playersQueue">
+      <ol>
+        <li v-for="player in players">
+          {{ player[0] }}
+        </li>
+      </ol>
+    </div>
+
+
+    <div id="formulario">
+        <div class="signyourwork">
+            <!--<p><?php _t("sign your work");?></p>-->
+            <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:input="changed"/>
+            <button id="comenzar" disabled><?php _t("draw");?></button>
+        </div>
+    </div>
+
 
     <script src="<?php echo $config->urls->templates; ?>dependencies/jquery-3.1.1.min.js"></script>
     <script src="<?php echo $config->urls->templates; ?>dependencies/p5.min.js"></script>
+    <!--VUE js production version, optimized for size and speed -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
     <script src="<?php echo $config->urls->templates; ?>scripts/home.js?v=1.0"></script>
 
 </body>

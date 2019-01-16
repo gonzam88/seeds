@@ -17,17 +17,127 @@ $.cssHooks.backgroundColor = {
     }
 }
 
-// Blank
+
+var login = new Vue({
+  el: '#formulario',
+  methods:{
+     changed: function(evt){
+         let count = this.nickname.length;
+         if(count > 3){
+             $("#comenzar").prop("disabled", false);
+         }else{
+             $("#comenzar").prop("disabled", true);
+         }
+     }
+   },
+  data: {
+      nickname: ""
+  }
+})
+
+var playersQueue = new Vue({
+  el: '#playersQueue',
+  data: {
+    players: []
+  }
+})
+
+
 var myp5, prev;
+var nickname;
+var ws;
+var soyArtista = false;
+
+function GetStatus(){
+    ws.send(JSON.stringify({action:"status"}))
+}
 
 $(document).ready(function(){
+
+    // socket connection
+    var HOST = location.origin.replace(/^http/, 'ws')
+    HOST = "ws://localhost:3000";
+
+    ws = new WebSocket(HOST);
+
+    // Connection opened
+    ws.addEventListener('open', function (event) {
+        //
+    });
+    ws.addEventListener('close', function (event) {
+        $("#formulario").removeClass("hide");
+    });
+    ws.addEventListener('error', function (event) {
+        $("#formulario").removeClass("hide");
+    });
+    // Listen for messages
+    ws.addEventListener('message', function (event) {
+        let data = JSON.parse(event.data)
+        console.log("Server:", data);
+
+        switch(data.action){
+            case "queuelist":
+                playersQueue.players = data.players
+            break;
+
+            case "sosartista":
+                StartArtistTime()
+            break;
+
+            case "linestart":
+            break;
+
+            case "vertex":
+            break;
+
+            case "lineend":
+            break;
+        }
+
+    });
+
+    // start
+    // Cargo el nombre ya guardado
+    if(localStorage.getItem("nickname")){
+        login.nickname = localStorage.getItem("nickname");
+        login.changed();
+    }
+
+    $("#comenzar").click(function(){
+        localStorage.setItem("nickname", login.nickname);
+        $("#formulario").addClass("hide");
+
+        let logInData = {
+            action: "login",
+            nickname: login.nickname
+        };
+        logInData = JSON.stringify(logInData);
+        if(!ws) return;
+        ws.send(logInData);
+    });
+
+
     prev = $.get("children",function( data ) {
         prev = data;
         // console.log(prev);
         myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
 
+
 })
+
+function StartArtistTime(){
+    console.log("Ahora dibujo yo");
+    soyArtista = true;
+    $("canvas:hover").css("cursor","crosshair");
+}
+
+function EndArtistTime(){
+    console.log("Terminé mi dibujo")
+    soyArtista = false;
+    $("canvas:hover").css("cursor","wait")
+}
+
 
 window.addEventListener("resize", onResize);
 
@@ -35,6 +145,7 @@ var safeArea;
 var squareSide;
 var myCanvas;
 var isSetup = true;
+
 
 function onResize(){
     let safeWidth = safeArea.width();
@@ -70,41 +181,6 @@ var sketch = function( p ) {
 
       p.background(255)
       p.scale(0.2,0.2);
-      // Los dibjo todos, conectados
-      if(prev.length>0){
-          p.translate(squareSide/2,squareSide/2);
-
-          for(let i = 0; i < prev.length; i++){
-
-                let puntos = JSON.parse( prev[i].puntos );
-                p.translate(-prev[i].offset[0], -prev[i].offset[1]); // no se bien por que tengo que hacerlo negativo pero funciona
-                p.fill('rgba(255,255,255, 0.5)');
-                p.textSize(40);
-                // p.text(prev[i].userName,squareSide/2,squareSide/2); // mostrar el nombre del que lo dibujo
-                for(let j = 0; j < puntos.length-1; j++){
-                    p.line(
-                      puntos[j][0],puntos[j][1],
-                      puntos[j+1][0],puntos[j+1][1],
-                    );
-                }
-          }
-
-          // let lastPoint = prev.puntos[prev.puntos.length-1];
-          // difx =  (squareSide/2) -lastPoint[0];
-          // dify = (squareSide/2) -  lastPoint[1];
-          // p.translate(difx, dify);
-          //
-          // for(let i = 0; i < prev.puntos.length-1; i++){
-          //     p.line(
-          //       prev.puntos[i][0],prev.puntos[i][1],
-          //       prev.puntos[i+1][0],prev.puntos[i+1][1],
-          //     );
-          // }
-          p.resetMatrix();
-
-
-      }
-
 
   };
 
@@ -116,55 +192,80 @@ var sketch = function( p ) {
   var startInk = 500;
   var ink = startInk;
 
+  p.lineas = []
+  var newLine = false;
 
   p.draw = function() {
-  //
-  //   p.stroke(255);
-  //   p.strokeWeight(1)
-  //
-  //   var mouseXoff = p.mouseX - 5;
-  //   var mouseYoff = p.mouseY - 5;
-  //
-  //   if (p.mouseIsPressed === true && !hasDrawn) {
-  //       if(!isDrawing){
-  //           let startVec = p.createVector(mouseXoff, mouseYoff);
-  //           let centerVec = p.createVector(squareSide/2, squareSide/2);
-  //           let dist  = startVec.dist(centerVec);
-  //           if(dist>5) return;
-  //
-  //           p.startTime = new Date().getTime();
-  //       }
-  //       isDrawing = true;
-  //       $("#starthere").hide();
-  //
-  //       if(mouseXoff != prevX || mouseYoff != prevY){
-  //           if(mouseXoff > 0 && mouseXoff < squareSide && mouseYoff > 0 && mouseYoff < squareSide){
-  //               if(ink > 0){
-  //                   p.puntos.push( [mouseXoff, mouseYoff]);
-  //                   // console.log(puntos);
-  //                   p.line(mouseXoff, mouseYoff, prevX, prevY);
-  //                   prevX = mouseXoff;
-  //                   prevY = mouseYoff;
-  //                   ink--;
-  //                   hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
-  //                   let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
-  //                   $("body").css("background-color", colorString);
-  //               }else{
-  //                   if(!hasDrawn){
-  //                       EndDrawing();
-  //                       hasDrawn = true;
-  //                   }
-  //
-  //               }
-  //           }
-  //       }
-  //   }else{
-  //       if(isDrawing && !hasDrawn){
-  //           EndDrawing();
-  //           hasDrawn  = true;
-  //           isDrawing = false;
-  //       }
-  //   }
+
+      // Mi dibujo
+      if(!soyArtista) return;
+      p.stroke(0);
+      p.strokeWeight(1)
+
+      var mouseXoff = p.mouseX - 5;
+      var mouseYoff = p.mouseY - 5;
+
+      if (p.mouseIsPressed === true && !hasDrawn) {
+
+        // if(!isDrawing){
+        let startVec = p.createVector(mouseXoff, mouseYoff);
+        let centerVec = p.createVector(squareSide/2, squareSide/2);
+        let dist  = startVec.dist(centerVec);
+        //if(dist>5) return;
+
+        p.startTime = new Date().getTime();
+
+        // }
+        isDrawing = true;
+        $("#starthere").hide();
+
+        if(mouseXoff != prevX || mouseYoff != prevY){
+            if(mouseXoff > 0 && mouseXoff < squareSide && mouseYoff > 0 && mouseYoff < squareSide){
+                if(ink > 0){
+                    if(newLine){
+                        ws.send(JSON.stringify({action:"linestart", x:mouseXoff, y: mouseYoff}))
+                        p.lineas.push([])
+                        newLine = false;
+                    }else{
+                        ws.send(JSON.stringify({action:"vertex", x:mouseXoff, y: mouseYoff}))
+                        p.lineas[p.lineas.length-1].push([mouseXoff, mouseYoff]);
+                        p.line(mouseXoff, mouseYoff, prevX, prevY);
+                    }
+
+                    // console.log(p.lineas)
+
+
+                    //p.puntos.push( [mouseXoff, mouseYoff]);
+                    // console.log(puntos);
+
+
+                    prevX = mouseXoff;
+                    prevY = mouseYoff;
+                    ink--;
+                    // hslBgColor.l = p.map(ink, 0,startInk,0, startLightness);
+                    // let colorString = `hsl(${hslBgColor.h},${hslBgColor.s}%,${hslBgColor.l}%)`;
+                    // $("body").css("background-color", colorString);
+                }else{
+                    if(!hasDrawn){
+                        //EndDrawing();
+                        hasDrawn = true;
+                    }
+
+                }
+            }
+        }
+    }else{
+        if(!newLine){
+            newLine = true;
+            ws.send(JSON.stringify({action:"lineend"}))
+        }
+
+        // if(isDrawing && !hasDrawn){
+        //     EndDrawing();
+        //     hasDrawn  = true;
+        //     isDrawing = false;
+        // }
+    }
 
   };
 };
