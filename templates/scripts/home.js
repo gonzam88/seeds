@@ -99,6 +99,8 @@ $(document).ready(function(){
             case "login":
                 myid = data.id;
                 playersQueue.myId = data.id;
+                playersLines = data.playersLines;
+
                 localStorage.setItem("nickname", login.nickname);
                 $("#formulario").addClass("hide");
                 $("#restart").addClass("hide");
@@ -122,6 +124,7 @@ $(document).ready(function(){
 
             case "linestart":
                 playersLines.push([]);
+                playersLines[playersLines.length-1].push([data.x, data.y]);
             break;
 
             case "vertex":
@@ -136,6 +139,16 @@ $(document).ready(function(){
 
             case "lineend":
             break;
+
+            case "borrarLineas":
+                let cuantas = data.cuantas;
+                for(let i = 0; i < cuantas; i++){
+                    if(playersLines.length > 0){
+                        let res = playersLines[0].shift(); // Borro el primer punto que haya
+                        if(res === undefined) playersLines.shift(); // Si ya no quedan puntos, borro el container de linea
+                    }
+                }
+            break;
         }
 
     });
@@ -145,7 +158,8 @@ $(document).ready(function(){
         if (ws.readyState === ws.OPEN) {
             let msg = {
                 action: "login",
-                nickname: login.nickname
+                nickname: login.nickname,
+                role: "player"
             };
             ws.send(JSON.stringify(msg));
         }
@@ -279,7 +293,7 @@ var sketch = function( p ) {
   var hasDrawn = false;
   var startInk = 9999500; // TODO server side
   var ink = startInk;
-  var linesDetail = 4; // Menos es màs detalle y más puntos
+  var linesDetail = 8; // Menos es màs detalle y más puntos
 
   p.lineas = []
   var newLine = false;
@@ -309,10 +323,12 @@ var sketch = function( p ) {
                         if(newLine){
                             ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
                             p.lineas.push([])
+                            playersLines.push([])
                             newLine = false;
                         }else{
                             ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
                             p.lineas[p.lineas.length-1].push([normalX, normalY]);
+                            playersLines[playersLines.length-1].push([normalX, normalY]);
                         }
                         prevX = normalX;
                         prevY = normalY;
@@ -341,7 +357,7 @@ var sketch = function( p ) {
     p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 2))
 
     // Render Dibujos de los otros
-    if(playersLines.length>0){
+    if(playersLines.length > 0){
         for(let i = 0; i < playersLines.length; i++){
             // Linea
             for(let j = 0; j < playersLines[i].length-1; j++){
@@ -356,6 +372,8 @@ var sketch = function( p ) {
     }
 
     // Render mi Dibujo
+    p.stroke("#43c585");
+    p.strokeWeight(1);
     if(p.lineas.length > 0){
         for(let i = 0; i < p.lineas.length; i++){
             for(let j = 0; j < p.lineas[i].length-1; j++){
@@ -381,31 +399,4 @@ function mousePressed () {
 
 function touchStarted(){
   return false;
-}
-
-function hexToHSL(hex) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    r = parseInt(result[1], 16);
-    g = parseInt(result[2], 16);
-    b = parseInt(result[3], 16);
-    r /= 255, g /= 255, b /= 255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, l = (max + min) / 2;
-    if(max == min){
-      h = s = 0; // achromatic
-    }else{
-      var d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch(max){
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-  var HSL = new Object();
-  HSL['h']=h;
-  HSL['s']=s;
-  HSL['l']=l;
-  return HSL;
 }

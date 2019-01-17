@@ -209,5 +209,6 @@ button:hover{
 
 
 .soyyo{
-	font-weight: bold
+	font-weight: bold;
+	text-decoration: underline;
 }
