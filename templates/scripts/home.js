@@ -11,8 +11,8 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
     player = new YT.Player("ytplayer", {
-        width: "100%",
-        videoId: "15XEYd4wClk",
+        width: "640",
+        videoId: "dKmJgVRSvk0",
         playerVars: {
             autoplay: 1,
             controls: 0,
@@ -276,8 +276,8 @@ function onResize(){
         myCanvas.css("height", squareSide);
     }
     // YT Player
-    $("#ytplayer").css("width",squareSide);
-    $("#ytplayer").css("height",squareSide);
+    $("#ytmask").css("width",squareSide);
+    $("#ytmask").css("height",squareSide);
 
     canvasInnerSize = $("canvas").innerWidth();
     isSetup = false;
@@ -446,9 +446,28 @@ var sketch = function( p ) {
     p.rect(0, .98 * initialCanvasSize, inkBarWidth, .2*initialCanvasSize)
 
 
-}; // p.draw
+    }; // p.draw
 }; // sketch
 
+function GuardarDibujoEnServer(){
+    let endTime = new Date().getTime();
+    let elapsedTime =  endTime - myp5.startTime;
+    elapsedTime /= 1000;
+
+    console.log("saving to server");
+    $.post( window.location, {
+        action      : "newtile",
+        userName    : nickname,
+        elapsedTime : elapsedTime,
+        puntos      : JSON.stringify(JSON.stringify(myp5.puntos))
+
+    }).done(function( data ) {
+          console.log( data );
+          if(data.status == "ok"){
+              location.reload();
+          }
+    });
+}
 
 function mousePressed () {
   cnt++;

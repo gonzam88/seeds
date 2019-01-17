@@ -1,29 +1,55 @@
 <?php include_once("_strings.php" );
 
+if($_GET["action"] == "deleteallmychildren" && $_GET["pass"] == "b3rN)7;/SScc8thd"){
+    foreach ($page->children as $child) {
+        $child->delete();
+    }
+}
+
+if ($_POST["action"] == "newtile") {
+
+    $p = new Page(); // create new page object
+    $p->template = 'tile'; // set template
+    $p->parent = $page; // set the parent
+    $p->name = uniqid(); // give it a name used in the url for the page
+    $p->title       = $_POST["userName"];
+    $p->elapsedTime = $_POST["elapsedTime"];
+    $p->puntos      = $_POST["puntos"];
+    $p->offsetx     = $_POST["offsetx"];
+    $p->offsety     = $_POST["offsety"];
+    $p->ip          = $_SERVER['REMOTE_ADDR'];
+    $p->user_agent  = $_SERVER['HTTP_USER_AGENT'];
+
+    $p->save();
+    header('Content-Type: application/json');
+    $resp["status"] = "ok";
+    echo json_encode($resp, true);
+    exit;
+}
+
 
 $seg = $input->urlSegment(1);
-if($seg == "children"){
+if($seg == "prev"){
     $resp = array();
-    $dibujo = $pages->find("template=dibujo")->last();
-    if($dibujo->numChildren() > 0){
+    if($page->numChildren() > 0){
 
-        $children = $dibujo->children();
-        foreach ($children as $child) {
-            $temp = array();
-            $temp["puntos"] = $child->puntos;
-            if($child->offsetx){
-                $temp["offset"] = array($child->offsetx, $child->offsety);
-            }else{
-                $temp["offset"] = array(0,0);
-            }
-            $temp["userName"] = $child->title;
-            $resp[] = $temp;
+        $prev = $page->children()->last;
+        $resp["puntos"] = $prev->puntos;
+        if($prev->offsetx){
+            $resp["offset"] = array($prev->offsetx, $prev->offsety);
+        }else{
+            $resp["offset"] = array(0,0);
         }
-
-        header('Content-Type: application/json');
-        echo json_encode($resp, true);
-        exit;
+        $resp["userName"] = $prev->title;
+    }else{
+        $resp["puntos"] = "[]";
+        $resp["offset"] = array(0,0);
+        $resp["userName"] = "";
     }
+
+    header('Content-Type: application/json');
+    echo json_encode($resp, true);
+    exit;
 }
 ?>
 
@@ -31,7 +57,9 @@ if($seg == "children"){
 <head>
   <meta charset="utf-8">
 
-  <title>GIMME SEEDS</title>
+  <title>paint irl</title>
+
+  <link rel="shortcut icon" type="image/png" href="<?php echo $config->urls->templates; ?>icon_mspaint.png"/>
   <meta name="description" content="Storing Seeds From Drawings for Drawings">
   <meta name="author" content="gonzalo moiguer">
 
@@ -57,12 +85,11 @@ if($seg == "children"){
             src="https://www.youtube.com/embed/15XEYd4wClk?autplay=1&feature=oembed&controls=0&hd=1&modestbranding=1&autohide=1&showinfo=0&enablejsapi=1"
             frameborder="0"/></iframe> -->
             <div id="ytplayerContainer">
-                <div id="ytplayer"></div>
+                <div id="ytmask">
+                    <div id="ytplayer"></div>
+                </div>
+
             </div>
-
-
-
-
 
         </div>
 

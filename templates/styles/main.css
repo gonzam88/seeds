@@ -212,8 +212,13 @@ button:hover{
 	text-decoration: underline;
 }
 
+#ytmask{
+	overflow: hidden;
+}
 #ytplayer{
-
+	height: 100%;
+	width: 100%;
+	transform: scale(1);
 }
 #ytplayerContainer{
 	display: flex;
