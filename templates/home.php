@@ -48,6 +48,11 @@ if($seg == "children"){
         <!-- <h2><?php _t("keep the chain going");?></h2> -->
 
         <div id="safe-area">
+            <div id="progressbar">
+                <div>
+                    
+                </div>
+            </div>
 
         </div>
 

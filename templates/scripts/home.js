@@ -54,7 +54,7 @@ var myid, nickname, queuePos;
 var ws;
 var soyArtista = false;
 var playersLines = [];
-var currArtistInk;
+var totalInk, currArtistInk;
 
 
 function GetStatus(){
@@ -100,6 +100,7 @@ $(document).ready(function(){
                 myid = data.id;
                 playersQueue.myId = data.id;
                 playersLines = data.playersLines;
+                totalInk = data.totalInk;
 
                 localStorage.setItem("nickname", login.nickname);
                 $("#formulario").addClass("hide");
@@ -373,7 +374,7 @@ var sketch = function( p ) {
 
     // Render mi Dibujo
     p.stroke("#43c585");
-    p.strokeWeight(1);
+    p.strokeWeight(.5);
     if(p.lineas.length > 0){
         for(let i = 0; i < p.lineas.length; i++){
             for(let j = 0; j < p.lineas[i].length-1; j++){
@@ -386,6 +387,12 @@ var sketch = function( p ) {
             }
         }
     }
+
+    // Render linea de tinta
+    p.fill(0, 0, 0, 160);
+    p.stroke(00, 0, 0);
+    let inkBarWidth = p.map(currArtistInk,0,totalInk,0, initialCanvasSize)
+    p.rect(0, .98 * initialCanvasSize, inkBarWidth, .2*initialCanvasSize)
 
 
 }; // p.draw
