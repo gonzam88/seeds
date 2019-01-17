@@ -59,6 +59,17 @@ if($seg == "prev"){
 
   <title>paint irl</title>
 
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-132757042-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-132757042-1');
+    </script>
+
+
   <link rel="shortcut icon" type="image/png" href="<?php echo $config->urls->templates; ?>icon_mspaint.png"/>
   <meta name="description" content="Storing Seeds From Drawings for Drawings">
   <meta name="author" content="gonzalo moiguer">
@@ -84,12 +95,12 @@ if($seg == "prev"){
                 <iframe id="ytplayer" type="text/html" width="640" height="360"
             src="https://www.youtube.com/embed/15XEYd4wClk?autplay=1&feature=oembed&controls=0&hd=1&modestbranding=1&autohide=1&showinfo=0&enablejsapi=1"
             frameborder="0"/></iframe> -->
-            <div id="ytplayerContainer">
+            <!-- <div id="ytplayerContainer"> -->
                 <div id="ytmask">
                     <div id="ytplayer"></div>
                 </div>
 
-            </div>
+            <!-- </div> -->
 
         </div>
 

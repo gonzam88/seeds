@@ -214,11 +214,19 @@ button:hover{
 
 #ytmask{
 	overflow: hidden;
+	padding: 0;
+    margin: auto;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 #ytplayer{
 	height: 100%;
 	width: 100%;
-	transform: scale(1);
+	transform: scale(1.8);
 }
 #ytplayerContainer{
 	display: flex;

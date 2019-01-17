@@ -10,9 +10,11 @@ firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
+    let myvideoid = clientOptions.videoId || "";
+
     player = new YT.Player("ytplayer", {
         width: "640",
-        videoId: "dKmJgVRSvk0",
+        videoId: myvideoid,
         playerVars: {
             autoplay: 1,
             controls: 0,
@@ -29,7 +31,8 @@ function onYouTubeIframeAPIReady() {
 }
 // Player ready handler. Autoplay video when player is ready
 function onPlayerReady(event) {
-    $('.btn').removeClass( "disabled" );
+
+
     player.playVideo()
     player.mute();
     //player.setPlaybackRate(rate - 0.25);
@@ -42,7 +45,18 @@ function onPlayerReady(event) {
 function onPlayerStateChange(event) {
 
 }
-
+function YouTubeGetID(url){
+  var ID = '';
+  url = url.replace(/(>|<)/gi,'').split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+  if(url[2] !== undefined) {
+    ID = url[2].split(/[^0-9a-z_\-]/i);
+    ID = ID[0];
+  }
+  else {
+    ID = url;
+  }
+    return ID;
+}
 
 
 $.cssHooks.backgroundColor = {
@@ -102,7 +116,7 @@ var ws;
 var soyArtista = false;
 var playersLines = [];
 var totalInk, currArtistInk;
-
+var clientOptions;
 
 function GetStatus(){
     ws.send(JSON.stringify({action:"status"}))
@@ -122,7 +136,7 @@ $(document).ready(function(){
     ws = new WebSocket(HOST);
     // Connection opened
     ws.addEventListener('open', function (event) {
-
+        ws.send(JSON.stringify({action: "getClientOptions"}));
         //$("#formulario").addClass("hide");
     });
     ws.addEventListener('close', function (event) {
@@ -153,6 +167,19 @@ $(document).ready(function(){
                 $("#formulario").addClass("hide");
                 $("#restart").addClass("hide");
             break;
+            case "clientOptions":
+                clientOptions = data.clientOptions;
+
+                if(player !== undefined){
+                    let currYtId = YouTubeGetID(player.getVideoUrl());
+                    if(clientOptions.videoId != currYtId){
+                        player.loadVideoById(clientOptions.videoId);
+                    }
+                }
+                $("#ytplayer").css("transform",`scale(${clientOptions.videoScale})`)
+
+
+            break;
             case "queuelist":
                 for(let i = 0; i < data.players.length; i++){
                     if(data.players[i][1] == myid) data.players[i].push("soyyo")
@@ -178,7 +205,7 @@ $(document).ready(function(){
             case "vertex":
                 currArtistInk = data.ink;
                 if(soyArtista){
-                    if(currArtistInk <= 0) EndArtistTime()
+                    if(currArtistInk <= 0){EndArtistTime(); console.log("aca")}
                 }else{
                     playersLines[playersLines.length-1].push([data.x, data.y]);
 
@@ -198,7 +225,6 @@ $(document).ready(function(){
                 }
             break;
         }
-
     });
 
     $("#comenzar").click(function(){
@@ -276,7 +302,7 @@ function onResize(){
         myCanvas.css("height", squareSide);
     }
     // YT Player
-    $("#ytmask").css("width",squareSide);
+    $("#ytmask").css("width",squareSide+5);
     $("#ytmask").css("height",squareSide);
 
     canvasInnerSize = $("canvas").innerWidth();
