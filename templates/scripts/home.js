@@ -1,3 +1,50 @@
+// YT Control
+var player;
+
+// This code loads the IFrame Player API code asynchronously. This is the Youtube-recommended script loading method
+var tag = document.createElement("script");
+tag.src = "https://youtube.com/iframe_api";
+tag.id = "youtubeScript";
+var firstScriptTag = document.getElementsByTagName("script")[1];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// Create youtube player (function called by YouTube API)
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player("ytplayer", {
+        width: "100%",
+        videoId: "15XEYd4wClk",
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            fs: 0,
+            showinfo: 0,
+            modestbranding: 1
+        },
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
+        }
+    });
+}
+// Player ready handler. Autoplay video when player is ready
+function onPlayerReady(event) {
+    $('.btn').removeClass( "disabled" );
+    player.playVideo()
+    player.mute();
+    //player.setPlaybackRate(rate - 0.25);
+    //player.setVolume(volume + 5);
+    //player.pauseVideo(); });
+    //player.stopVideo();
+}
+
+// Video state change handler.
+function onPlayerStateChange(event) {
+
+}
+
+
+
 $.cssHooks.backgroundColor = {
     get: function(elem) {
         if (elem.currentStyle)
@@ -228,9 +275,11 @@ function onResize(){
         myCanvas.css("width", squareSide);
         myCanvas.css("height", squareSide);
     }
+    // YT Player
+    $("#ytplayer").css("width",squareSide);
+    $("#ytplayer").css("height",squareSide);
 
     canvasInnerSize = $("canvas").innerWidth();
-
     isSetup = false;
 }
 
@@ -353,11 +402,27 @@ var sketch = function( p ) {
 
     //
     // RENDERS
-    p.background(255)
-    p.stroke(0);
-    p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 2))
+    p.clear();
+
+    // Render mi Dibujo
+    p.stroke("#43c585");
+    p.strokeWeight(1);
+    if(p.lineas.length > 0){
+        for(let i = 0; i < p.lineas.length; i++){
+            for(let j = 0; j < p.lineas[i].length-1; j++){
+                p.line(
+                    p.lineas[i][j][0] * initialCanvasSize,  // x1
+                    p.lineas[i][j][1] * initialCanvasSize,  // y1
+                    p.lineas[i][j+1][0] * initialCanvasSize,// x2
+                    p.lineas[i][j+1][1] * initialCanvasSize,// y2
+                );
+            }
+        }
+    }
 
     // Render Dibujos de los otros
+    p.stroke(0);
+    p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 3))
     if(playersLines.length > 0){
         for(let i = 0; i < playersLines.length; i++){
             // Linea
@@ -372,21 +437,7 @@ var sketch = function( p ) {
         }
     }
 
-    // Render mi Dibujo
-    p.stroke("#43c585");
-    p.strokeWeight(.5);
-    if(p.lineas.length > 0){
-        for(let i = 0; i < p.lineas.length; i++){
-            for(let j = 0; j < p.lineas[i].length-1; j++){
-                p.line(
-                    p.lineas[i][j][0] * initialCanvasSize,  // x1
-                    p.lineas[i][j][1] * initialCanvasSize,  // y1
-                    p.lineas[i][j+1][0] * initialCanvasSize,// x2
-                    p.lineas[i][j+1][1] * initialCanvasSize,// y2
-                );
-            }
-        }
-    }
+
 
     // Render linea de tinta
     p.fill(0, 0, 0, 160);

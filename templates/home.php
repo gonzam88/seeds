@@ -48,13 +48,24 @@ if($seg == "children"){
         <!-- <h2><?php _t("keep the chain going");?></h2> -->
 
         <div id="safe-area">
-            <div id="progressbar">
-                <div>
-                    
-                </div>
+            <div>
+
             </div>
 
+                <!-- <?php $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>
+                <iframe id="ytplayer" type="text/html" width="640" height="360"
+            src="https://www.youtube.com/embed/15XEYd4wClk?autplay=1&feature=oembed&controls=0&hd=1&modestbranding=1&autohide=1&showinfo=0&enablejsapi=1"
+            frameborder="0"/></iframe> -->
+            <div id="ytplayerContainer">
+                <div id="ytplayer"></div>
+            </div>
+
+
+
+
+
         </div>
+
 
     </div>
 

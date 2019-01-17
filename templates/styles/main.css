@@ -211,3 +211,14 @@ button:hover{
 .soyyo{
 	text-decoration: underline;
 }
+
+#ytplayer{
+
+}
+#ytplayerContainer{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: 100%;
+}
