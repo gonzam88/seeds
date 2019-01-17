@@ -130,8 +130,12 @@ $(document).ready(function(){
         login.changed();
     }
 
-    var HOST = location.origin.replace(/^http/, 'ws')
-    HOST = "ws://localhost:3000";
+    var HOST;
+    if(location.origin == "https://paint.coso.cloud"){
+        HOST = "ws://paintirl-server.herokuapp.com";
+    }else{
+        HOST = "ws://localhost:3000";
+    }
 
     ws = new WebSocket(HOST);
     // Connection opened
