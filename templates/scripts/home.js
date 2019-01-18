@@ -2,11 +2,14 @@
 var player;
 
 // This code loads the IFrame Player API code asynchronously. This is the Youtube-recommended script loading method
-var tag = document.createElement("script");
-tag.src = "https://youtube.com/iframe_api";
-tag.id = "youtubeScript";
-var firstScriptTag = document.getElementsByTagName("script")[1];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+function InitYoutubeAPI(){
+    var tag = document.createElement("script");
+    tag.src = "https://youtube.com/iframe_api";
+    tag.id = "youtubeScript";
+    var firstScriptTag = document.getElementsByTagName("script")[1];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+}
+
 
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
@@ -132,7 +135,7 @@ $(document).ready(function(){
 
     var HOST;
     if(location.origin == "https://paint.coso.cloud"){
-        HOST = "ws://paintirl-server.herokuapp.com";
+        HOST = "wss://paintirl-server.herokuapp.com";
     }else{
         HOST = "ws://localhost:3000";
     }
@@ -158,7 +161,7 @@ $(document).ready(function(){
     // Listen for messages
     ws.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-        console.log("Server:", data);
+        //console.log("Server:", data);
 
         switch(data.action){
             case "login":
@@ -179,6 +182,8 @@ $(document).ready(function(){
                     if(clientOptions.videoId != currYtId){
                         player.loadVideoById(clientOptions.videoId);
                     }
+                }else{
+                    InitYoutubeAPI();
                 }
                 $("#ytplayer").css("transform",`scale(${clientOptions.videoScale})`)
 

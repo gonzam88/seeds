@@ -81,10 +81,6 @@ if($seg == "prev"){
 </head>
 
 <body>
-    <?php foreach ($users->find("start=0") as $u)
-{
-    echo $u->name;
-}?>
     <div id="container">
         <h1><?php _t("paint irl");?></h1>
         <!-- <h2><?php _t("keep the chain going");?></h2> -->
