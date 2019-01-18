@@ -1,4 +1,9 @@
 <?php
+if($_GET["config"]==1){
+	include_once("_config-page.html" );
+	exit;
+}
+
 $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
 $acceptLang = ['es'];
 if(in_array($lang, $acceptLang)){
