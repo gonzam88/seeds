@@ -1,3 +1,10 @@
+var debug = false;
+function p(txt){
+    if(debug){
+        console.log(txt)
+    }
+}
+
 // YT Control
 var player;
 
@@ -138,6 +145,7 @@ $(document).ready(function(){
         HOST = "wss://paintirl-server.herokuapp.com";
     }else{
         HOST = "ws://localhost:3000";
+        debug = true;
     }
 
     ws = new WebSocket(HOST);
@@ -156,12 +164,12 @@ $(document).ready(function(){
             $(this).removeClass('visible');
             next();
         });
-        //console.log("Error", event)
+        //p("Error", event)
     });
     // Listen for messages
     ws.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-        //console.log("Server:", data);
+        //p("Server:", data);
 
         switch(data.action){
             case "login":
@@ -214,7 +222,7 @@ $(document).ready(function(){
             case "vertex":
                 currArtistInk = data.ink;
                 if(soyArtista){
-                    if(currArtistInk <= 0){EndArtistTime(); console.log("aca")}
+                    if(currArtistInk <= 0){EndArtistTime(); p("aca")}
                 }else{
                     playersLines[playersLines.length-1].push([data.x, data.y]);
 
@@ -262,13 +270,13 @@ $(document).ready(function(){
 
     prev = $.get("children",function( data ) {
         prev = data;
-        // console.log(prev);
+        // p(prev);
         myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
 })
 
 function StartArtistTime(){
-    console.log("Ahora dibujo yo");
+    p("Ahora dibujo yo");
     soyArtista = true;
     $("canvas:hover").css("cursor","crosshair");
     $("body").addClass("soyArtista");
@@ -280,7 +288,7 @@ function StartArtistTime(){
 }
 
 function EndArtistTime(){
-    console.log("Terminé mi dibujo")
+    p("Terminé mi dibujo")
     soyArtista = false;
     $("#restart").removeClass("hide");
     $("body").removeClass("soyArtista");
@@ -370,7 +378,7 @@ var sketch = function( p ) {
         mXpos -= obj_left;
         mYpos -= obj_top;
         // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
-        //console.log(mXpos, mYpos)
+        //p(mXpos, mYpos)
       }
       document.getElementById("tile").onmousemove = findObjectCoords;
 
@@ -494,7 +502,7 @@ function GuardarDibujoEnServer(){
     let elapsedTime =  endTime - myp5.startTime;
     elapsedTime /= 1000;
 
-    console.log("saving to server");
+    p("saving to server");
     $.post( window.location, {
         action      : "newtile",
         userName    : nickname,
@@ -502,7 +510,7 @@ function GuardarDibujoEnServer(){
         puntos      : JSON.stringify(JSON.stringify(myp5.puntos))
 
     }).done(function( data ) {
-          console.log( data );
+          p( data );
           if(data.status == "ok"){
               location.reload();
           }

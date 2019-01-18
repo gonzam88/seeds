@@ -1,4 +1,10 @@
-<?php include_once("_strings.php" );
+<?php
+$lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
+print_r($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+$acceptLang = ['es'];
+if(in_array($lang, $acceptLang)){
+    include_once("_strings.php" );
+}
 
 if($_GET["action"] == "deleteallmychildren" && $_GET["pass"] == "b3rN)7;/SScc8thd"){
     foreach ($page->children as $child) {
@@ -90,7 +96,7 @@ if($seg == "prev"){
         </div>
     </div>
     <div id="tuturno">
-        <?php _t("your turn!")?>
+        <?php _t("you draw now!")?>
     </div>
 
     <div id="playersQueue">
