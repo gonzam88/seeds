@@ -251,6 +251,10 @@ $(document).ready(function(){
                     }
                 }
             break;
+
+            case "borrarDibujo":
+                playersLines = [];
+            break;
         }
     });
 
