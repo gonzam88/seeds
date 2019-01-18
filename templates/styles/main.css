@@ -31,7 +31,7 @@ footer, header, hgroup, menu, nav, section {
 body {
 	font-family: 'Space Mono', monospace;
 	overflow: hidden;
-    height: 100vh;
+    max-height: 100vh;
     background-color: #6e4fe0;
     color: #96caf7;
     line-height: 20px;
@@ -210,7 +210,7 @@ button:hover{
     color: white;
 	display: none;
 }
-#pasarturno{
+.soyArtista #pasarturno{
 	display: block;
 }
 
