@@ -29,8 +29,12 @@ footer, header, hgroup, menu, nav, section {
 	display: block;
 }
 body {
-	line-height: 1;
+	font-family: 'Space Mono', monospace;
 	overflow: hidden;
+    height: 100vh;
+    background-color: #6e4fe0;
+    color: #96caf7;
+    line-height: 20px;
 }
 
 blockquote, q {
@@ -47,13 +51,6 @@ table {
 }
 
 /* seed */
-body{
-    font-family: 'Space Mono', monospace;
-    background-color: #6e4fe0;
-    color: #96caf7;
-
-    line-height: 20px;
-}
 a{
     color: black;
 }
