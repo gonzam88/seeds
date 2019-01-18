@@ -76,7 +76,7 @@ if($seg == "prev"){
 
 
   <link rel="shortcut icon" type="image/png" href="<?php echo $config->urls->templates; ?>icon_mspaint.png"/>
-  <meta name="description" content="Storing Seeds From Drawings for Drawings">
+  <meta name="description" content="NetArt colaborativo. Dibujo sobre video">
   <meta name="author" content="gonzalo moiguer">
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
