@@ -83,38 +83,33 @@ if($seg == "prev"){
 <body>
     <div id="container">
         <h1><?php _t("paint irl");?></h1>
-        <!-- <h2><?php _t("keep the chain going");?></h2> -->
-
         <div id="safe-area">
-            <div>
-
+            <div id="ytmask">
+                <div id="ytplayer"></div>
             </div>
-
-                <!-- <?php $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>
-                <iframe id="ytplayer" type="text/html" width="640" height="360"
-            src="https://www.youtube.com/embed/15XEYd4wClk?autplay=1&feature=oembed&controls=0&hd=1&modestbranding=1&autohide=1&showinfo=0&enablejsapi=1"
-            frameborder="0"/></iframe> -->
-            <!-- <div id="ytplayerContainer"> -->
-                <div id="ytmask">
-                    <div id="ytplayer"></div>
-                </div>
-
-            <!-- </div> -->
-
         </div>
-
-
+    </div>
+    <div id="tuturno">
+        <?php _t("your turn!")?>
     </div>
 
     <div id="playersQueue">
-        <div v-bind:class="artist[2] ">{{artist[0]}}</div>
-        <ol start="2">
-            <li v-for="player in players"  v-bind:class="player[2]">{{ player[0] }}</li>
-        </ol>
+        <div v-if="artist != '' || player.length > 0">
+            <div v-bind:class="artist[2] "><?php _t("drawing now:") ?><br />{{artist[0]}}</div>
+            <ol start="2">
+                <li v-for="player in players"  v-bind:class="player[2]">{{ player[0] }}</li>
+            </ol>
+        </div>
+        <div v-else>
+            <?php _t("nobody´s<br />drawing 😭") ?>
+        </div>
     </div>
 
     <div id="restart" class="hide">
-        <a title="<?php _t("start again") ?>" href="#"><i class="fas fa-undo-alt fa-2x"></i></a>
+        <a class="circulo" title="<?php _t("start again") ?>" href="#"><i class="fas fa-undo-alt fa-2x"></i></a>
+        <br /><p>
+
+        <a title="<?php _t("start again") ?>" href="#"><?php _t("start again") ?></p></a>
     </div>
 
     <div id="formulario">
@@ -123,6 +118,7 @@ if($seg == "prev"){
             <h1><?php _t("paint irl");?></h1>
             <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:input="changed"/>
             <button id="comenzar" disabled><?php _t("draw");?></button>
+            <p><?php _t("When it´s your turn, you can draw over video. Eventually, it will be drawn IRL") ?></p>
             <div class="conectionError">
                 <?php _t("connection error") ?>
             </div>

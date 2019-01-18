@@ -272,6 +272,11 @@ function StartArtistTime(){
     soyArtista = true;
     $("canvas:hover").css("cursor","crosshair");
     $("body").addClass("soyArtista");
+
+    $("#tuturno").addClass("visible").delay(2000).queue(function(next){
+        $(this).removeClass('visible');
+        next();
+    });
 }
 
 function EndArtistTime(){
@@ -378,7 +383,7 @@ var sketch = function( p ) {
   var hasDrawn = false;
   var startInk = 9999500; // TODO server side
   var ink = startInk;
-  var linesDetail = 8; // Menos es màs detalle y más puntos
+  var linesDetail = 11; // Menos es màs detalle y más puntos
 
   p.lineas = []
   var newLine = false;

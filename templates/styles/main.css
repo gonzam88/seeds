@@ -92,13 +92,17 @@ a{
 	height: 100vh;
 	text-align: center;
 	display: flex;
+	flex-direction: column;
     align-items: center;
 	justify-content: center;
 	text-align: center;
 	background-color: #ffffff87;
 	z-index: 20;
 }
-#restart a{
+#restart p{
+	color: #969696;
+}
+#restart .circulo{
 	color: white;
     background-color: #61deb6;
     border-radius: 40px;
@@ -126,6 +130,10 @@ a{
 	color: #000;
 	margin-bottom: 60px;
 	font-size: 20px;
+}
+.signyourwork p{
+	margin-top: 25px;
+	color: #969696;
 }
 #itsnotok, #itsok{
 	margin: 0px 20px;
@@ -189,12 +197,30 @@ button:hover{
 	opacity: 100;
 }
 
+#tuturno{
+	text-align: center;
+    margin-top: 10px;
+    color: white;
+	opacity: 0;
+}
+#tuturno.visible{
+	opacity: 100;
+}
+
+
 #playersQueue {
     width: 150px;
     position: absolute;
     top: 5px;
     right: 10px;
 	z-index: 1;
+	-webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 }
 #playersQueue div{
 	text-align: center;
