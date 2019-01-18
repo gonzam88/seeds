@@ -1,6 +1,5 @@
 <?php
 $lang = substr($_SERVER['HTTP_ACCEPT_LANGUAGE'], 0, 2);
-print_r($_SERVER['HTTP_ACCEPT_LANGUAGE']);
 $acceptLang = ['es'];
 if(in_array($lang, $acceptLang)){
     include_once("_strings.php" );
