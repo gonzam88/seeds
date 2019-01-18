@@ -99,6 +99,9 @@ var login = new Vue({
          }else{
              $("#comenzar").prop("disabled", true);
          }
+     },
+     triggerComenzar: function(evt){
+         $("#comenzar").click();
      }
    },
   data: {

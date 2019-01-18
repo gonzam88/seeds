@@ -125,7 +125,7 @@ if($seg == "prev"){
 
         <div class="signyourwork">
             <h1><?php _t("paint irl");?></h1>
-            <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:input="changed"/>
+            <input id="userName" type="text" maxlength="12" v-model="nickname" placeholder="<?php _t("your name");?>" v-on:keyup="changed" v-on:keyup.enter="triggerComenzar"/>
             <button id="comenzar" disabled><?php _t("draw");?></button>
             <p><?php _t("When it´s your turn, you can draw over video. Eventually, it will be drawn IRL") ?></p>
             <div class="conectionError">
