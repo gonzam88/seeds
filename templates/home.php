@@ -103,7 +103,7 @@ if($seg == "prev"){
 
 
     <div id="playersQueue">
-        <div v-if="artist != '' || player.length > 0">
+        <div v-if="artist != '' || (typeof player != 'undefined' && player.length > 0)">
             <div v-bind:class="artist[2] "><?php _t("drawing now:") ?><br />{{artist[0]}}</div>
             <ol start="2">
                 <li v-for="player in players"  v-bind:class="player[2]">{{ player[0] }}</li>
