@@ -1,5 +1,5 @@
 <?php
-if($_GET["config"]==1){
+if($_GET["config"]=="1"){
 	include_once("_config-page.html" );
 	exit;
 }
