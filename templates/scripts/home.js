@@ -152,7 +152,7 @@ $(document).ready(function(){
 
     var HOST;
     if(location.origin == "https://paint.coso.cloud"){
-        HOST = "wss://paintirl-server.herokuapp.com";
+        HOST = "ws://104.131.30.187:3000";
     }else{
         HOST = "ws://localhost:3000";
         debug = true;
