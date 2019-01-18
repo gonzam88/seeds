@@ -202,10 +202,19 @@ button:hover{
 	text-align: center;
     margin-top: 10px;
     color: white;
-	opacity: 0;
+	display: none;
 }
 #tuturno.visible{
-	opacity: 100;
+	display: block;
+}
+#pasarturno{
+	text-align: center;
+    margin-top: 10px;
+    color: white;
+	display: none;
+}
+#pasarturno{
+	display: block;
 }
 
 

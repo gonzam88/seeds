@@ -132,6 +132,13 @@ function GetStatus(){
     ws.send(JSON.stringify({action:"status"}))
 }
 
+function TerminarDibujo(){
+    if(soyArtista && ws.readyState === ws.OPEN){
+        ws.send(JSON.stringify({action:"terminarDibujo"}))
+        EndArtistTime()
+    }
+}
+
 $(document).ready(function(){
     // start
     // Cargo el nombre ya guardado
@@ -391,7 +398,7 @@ var sketch = function( p ) {
   var hasDrawn = false;
   var startInk = 9999500; // TODO server side
   var ink = startInk;
-  var linesDetail = 11; // Menos es màs detalle y más puntos
+  var linesDetail = 8; // Menos es màs detalle y más puntos
 
   p.lineas = []
   var newLine = false;

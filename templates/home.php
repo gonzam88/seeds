@@ -97,6 +97,10 @@ if($seg == "prev"){
     <div id="tuturno">
         <?php _t("you draw now!")?>
     </div>
+    <div id="pasarturno">
+        <button onclick="TerminarDibujo();">terminar dibujo</button>
+    </div>
+
 
     <div id="playersQueue">
         <div v-if="artist != '' || player.length > 0">
