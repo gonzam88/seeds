@@ -89,6 +89,7 @@ if($seg == "prev"){
     <div id="container">
         <h1><?php _t("paint irl");?></h1>
         <div id="safe-area">
+            <canvas id="tile" width="800" height="800"></canvas>
             <div id="ytmask">
                 <div id="ytplayer"></div>
             </div>
@@ -115,7 +116,7 @@ if($seg == "prev"){
     </div>
 
     <div id="restart" class="hide">
-        <a class="circulo" title="<?php _t("start again") ?>" href="#"><i class="fas fa-undo-alt fa-2x"></i></a>
+        <a class="circulo" title="<?php _t("start again") ?>" href="#"><i class="fas fa-redo-alt fa-2x"></i></a>
         <br /><p>
 
         <a title="<?php _t("start again") ?>" href="#"><?php _t("start again") ?></p></a>
@@ -136,7 +137,8 @@ if($seg == "prev"){
 
 
     <script src="<?php echo $config->urls->templates; ?>dependencies/jquery-3.1.1.min.js"></script>
-    <script src="<?php echo $config->urls->templates; ?>dependencies/p5.min.js"></script>
+    <!-- <script src="<?php //echo $config->urls->templates; ?>dependencies/p5.min.js"></script> -->
+    <script src="<?php echo $config->urls->templates; ?>dependencies/paperjs-v0.12.0/paper-full.min.js"></script>
     <!--VUE js production version, optimized for size and speed -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 

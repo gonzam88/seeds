@@ -1,3 +1,6 @@
+// paper js install
+
+
 var debug = false;
 function p(txt){
     if(debug){
@@ -68,27 +71,6 @@ function YouTubeGetID(url){
     return ID;
 }
 
-
-$.cssHooks.backgroundColor = {
-    get: function(elem) {
-        if (elem.currentStyle)
-            var bg = elem.currentStyle["backgroundColor"];
-        else if (window.getComputedStyle)
-            var bg = document.defaultView.getComputedStyle(elem,
-                null).getPropertyValue("background-color");
-        if (bg.search("rgb") == -1)
-            return bg;
-        else {
-            bg = bg.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-            function hex(x) {
-                return ("0" + parseInt(x).toString(16)).slice(-2);
-            }
-            return "#" + hex(bg[1]) + hex(bg[2]) + hex(bg[3]);
-        }
-    }
-}
-
-
 var login = new Vue({
   el: '#formulario',
   methods:{
@@ -127,7 +109,8 @@ var myp5, prev;
 var myid, nickname, queuePos;
 var ws;
 var soyArtista = false;
-var playersLines = [];
+var playersPaths;
+
 var totalInk, currArtistInk;
 var clientOptions;
 
@@ -179,13 +162,23 @@ $(document).ready(function(){
     // Listen for messages
     ws.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-        //p("Server:", data);
 
         switch(data.action){
             case "login":
                 myid = data.id;
                 playersQueue.myId = data.id;
-                playersLines = data.playersLines;
+                with(paper){
+                    for(let i = 0; i < data.playersLines.length; i++){
+                        let path = new Path();
+                        path.strokeColor = "color"
+                        playersPaths.addChild(path);
+                        for(let j = 0; j < data.playersLines[i].length; j++){
+                            let _x = data.playersLines[i][j][0] * 800; // 800 es el tamaño inicial del canvas. de ahi escala para arriba y para abajo
+                            let _y = data.playersLines[i][j][1] * 800;
+                            path.add( new Point(_x, _y) );
+                        }
+                    }
+                }
                 totalInk = data.totalInk;
 
                 localStorage.setItem("nickname", login.nickname);
@@ -225,17 +218,29 @@ $(document).ready(function(){
             break;
 
             case "linestart":
-                playersLines.push([]);
-                playersLines[playersLines.length-1].push([data.x, data.y]);
+                with(paper){
+                    let path = new Path();
+                    let _x = data.x * 800; // 800 es el tamaño inicial del canvas. de ahi escala para arriba y para abajo
+                    let _y = data.y * 800;
+                    path.add( new Point(_x, _y) );
+                    playersPaths.addChild(path);
+                }
+
             break;
 
             case "vertex":
                 currArtistInk = data.ink;
                 if(soyArtista){
-                    if(currArtistInk <= 0){EndArtistTime(); p("aca")}
+                    if(currArtistInk <= 0){EndArtistTime();}
                 }else{
-                    playersLines[playersLines.length-1].push([data.x, data.y]);
-
+                    with(paper){
+                        let _x = data.x * 800;
+                        let _y = data.y * 800;
+                        let p = new Point(_x, _y);
+                        if(p !== null){
+                            playersPaths.lastChild.add(p);
+                        }
+                    }
                 }
             break;
 
@@ -245,15 +250,14 @@ $(document).ready(function(){
             case "borrarLineas":
                 let cuantas = data.cuantas;
                 for(let i = 0; i < cuantas; i++){
-                    if(playersLines.length > 0){
-                        let res = playersLines[0].shift(); // Borro el primer punto que haya
-                        if(res === undefined) playersLines.shift(); // Si ya no quedan puntos, borro el container de linea
+                    if(playersPaths.children.length.length > 1){ // dejo el primer lugar con uno vacio para evitar un bug raro
+                        playersPaths.firstChild.firstSegment.remove() // Borro el primer punto de la primer linea
                     }
                 }
             break;
 
             case "borrarDibujo":
-                playersLines = [];
+                playersPaths.removeChildren()
             break;
         }
     });
@@ -285,7 +289,7 @@ $(document).ready(function(){
     prev = $.get("children",function( data ) {
         prev = data;
         // p(prev);
-        myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
+        // myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
     });
 })
 
@@ -306,6 +310,7 @@ function EndArtistTime(){
     soyArtista = false;
     $("#restart").removeClass("hide");
     $("body").removeClass("soyArtista");
+    startedDrawing = false;
 }
 
 
@@ -317,11 +322,11 @@ var myCanvas;
 var isSetup = true;
 
 var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
-var initialCanvasSize; // Este es fijo desde el principio. Lo uso para escalar los valores normalizados. Por cuando resizeas la pantalla, el canvas no se modifica, solo zoomea o comprime
+var initialCanvasSize; // TODO: borrar
 
 var mXpos; // Mouse relative to canvas
 var mYpos;
-
+var canvas;
 
 function onResize(){
     let safeWidth = safeArea.width();
@@ -333,10 +338,10 @@ function onResize(){
         squareSide = safeWidth;
     }
 
-    if(!isSetup){
-        myCanvas.css("width", squareSide);
-        myCanvas.css("height", squareSide);
-    }
+
+    $(canvas).css("width", squareSide);
+    $(canvas).css("height", squareSide);
+
     // YT Player
     $("#ytmask").css("width",squareSide+5);
     $("#ytmask").css("height",squareSide);
@@ -345,58 +350,124 @@ function onResize(){
     isSetup = false;
 }
 
-var difx, dify;
+
+var startedDrawing = false;
+
+
+window.onload = function() {
+    canvas = document.getElementById('tile');
+    paper.setup(canvas);
+
+
+
+
+
+    safeArea = $("#safe-area");
+
+    onResize();
+    canvasInnerSize = $("canvas").innerWidth();
+
+    function findObjectCoords(mouseEvent)
+    {
+      var obj = document.getElementById("tile");
+      var obj_left = 0;
+      var obj_top = 0;
+
+      while (obj.offsetParent)
+      {
+        obj_left += obj.offsetLeft;
+        obj_top += obj.offsetTop;
+        obj = obj.offsetParent;
+      }
+      if (mouseEvent)
+      {
+        //FireFox
+        mXpos = mouseEvent.pageX;
+        mYpos = mouseEvent.pageY;
+      }
+      else
+      {
+        //IE
+        mXpos = window.event.x + document.body.scrollLeft - 2;
+        mYpos = window.event.y + document.body.scrollTop - 2;
+      }
+      mXpos -= obj_left;
+      mYpos -= obj_top;
+      // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
+      //p(mXpos, mYpos)
+    }
+    document.getElementById("tile").onmousemove = findObjectCoords;
+
+    with(paper){
+
+        playersPaths = new Group();
+        playersPaths.style = {
+            strokeColor: '#000000',
+        	strokeWidth: 100,
+            strokeCap : 'round',
+            strokeJoin : 'round',
+        }
+        playersPaths.strokeWidth = 10;
+        let p = new Path();
+        playersPaths.addChild(p); // hack raro para evitar un error
+
+        var tool = new Tool();
+        tool.minDistance = 10;
+        var lineas = [];
+        var prevX, prevY;
+        var newLine = false;
+
+        tool.onMouseDown = function(event) {
+            if(soyArtista){
+                if(!startedDrawing){
+                    startedDrawing = false;
+                }
+            }
+        }
+
+        tool.onMouseDrag = function(event) {
+            // Add a point to the path every time the mouse is dragged
+            if(soyArtista){
+                if(!startedDrawing){
+                    p.startTime = new Date().getTime();
+                    startedDrawing = true;
+                }
+
+                // Mouse position. Normalized 0 <-> 1
+                var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
+                var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
+
+                if(normalX != prevX || normalY != prevY){
+                    // Evito dibujar si el mouse no se movio
+                    let decimalDetail = 8;
+                    if(newLine){
+                        ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
+                        // lineas.push([])
+                        // playersLines.push([])
+                        newLine = false;
+                    }else{
+                        ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
+                        // lineas[lineas.length-1].push([normalX, normalY]);
+                        // playersLines[playersLines.length-1].push([normalX, normalY]);
+                    }
+                    prevX = normalX;
+                    prevY = normalY;
+                } // if(normalX != prevX || normalY != prevY)
+            }
+        }
+
+        tool.onMouseUp = function(event){
+            newLine = true;
+            ws.send(JSON.stringify({action:"lineend"}))
+        }
+    }
+
+}
+
+
+
 
 var sketch = function( p ) {
-
-  p.setup = function() {
-      safeArea = $("#safe-area");
-
-      onResize();
-
-      tile = p.createCanvas(squareSide, squareSide);
-      tile.id('tile');
-      tile.parent("safe-area");
-      myCanvas = $('#tile');
-
-      p.background(255)
-      p.scale(0.2,0.2);
-
-      canvasInnerSize = $("canvas").innerWidth();
-      initialCanvasSize = canvasInnerSize;
-
-      function findObjectCoords(mouseEvent)
-      {
-        var obj = document.getElementById("tile");
-        var obj_left = 0;
-        var obj_top = 0;
-
-        while (obj.offsetParent)
-        {
-          obj_left += obj.offsetLeft;
-          obj_top += obj.offsetTop;
-          obj = obj.offsetParent;
-        }
-        if (mouseEvent)
-        {
-          //FireFox
-          mXpos = mouseEvent.pageX;
-          mYpos = mouseEvent.pageY;
-        }
-        else
-        {
-          //IE
-          mXpos = window.event.x + document.body.scrollLeft - 2;
-          mYpos = window.event.y + document.body.scrollTop - 2;
-        }
-        mXpos -= obj_left;
-        mYpos -= obj_top;
-        // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
-        //p(mXpos, mYpos)
-      }
-      document.getElementById("tile").onmousemove = findObjectCoords;
-
-  };
 
   var cnt = 0;
   var prevX, prevY;
@@ -435,12 +506,12 @@ var sketch = function( p ) {
                         if(newLine){
                             ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
                             p.lineas.push([])
-                            playersLines.push([])
+                            // playersLines.push([])
                             newLine = false;
                         }else{
                             ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
                             p.lineas[p.lineas.length-1].push([normalX, normalY]);
-                            playersLines[playersLines.length-1].push([normalX, normalY]);
+                            // playersLines[playersLines.length-1].push([normalX, normalY]);
                         }
                         prevX = normalX;
                         prevY = normalY;
@@ -485,19 +556,19 @@ var sketch = function( p ) {
     // Render Dibujos de los otros
     p.stroke(0);
     p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 3))
-    if(playersLines.length > 0){
-        for(let i = 0; i < playersLines.length; i++){
-            // Linea
-            for(let j = 0; j < playersLines[i].length-1; j++){
-                p.line(
-                  playersLines[i][j][0] * initialCanvasSize,    // x1
-                  playersLines[i][j][1] * initialCanvasSize,    // y2
-                  playersLines[i][j+1][0] * initialCanvasSize,  // x2
-                  playersLines[i][j+1][1] * initialCanvasSize,  // y2
-                );
-            }
-        }
-    }
+    // if(playersLines.length > 0){
+    //     for(let i = 0; i < playersLines.length; i++){
+    //         // Linea
+    //         for(let j = 0; j < playersLines[i].length-1; j++){
+    //             p.line(
+    //               playersLines[i][j][0] * initialCanvasSize,    // x1
+    //               playersLines[i][j][1] * initialCanvasSize,    // y2
+    //               playersLines[i][j+1][0] * initialCanvasSize,  // x2
+    //               playersLines[i][j+1][1] * initialCanvasSize,  // y2
+    //             );
+    //         }
+    //     }
+    // }
 
 
 
@@ -529,6 +600,11 @@ function GuardarDibujoEnServer(){
               location.reload();
           }
     });
+}
+
+function map(x, in_min, in_max, out_min, out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 function mousePressed () {
