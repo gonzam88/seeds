@@ -134,8 +134,8 @@ $(document).ready(function(){
     }
 
     var HOST;
-    if(location.origin == "https://paint.coso.cloud"){
-        HOST = "wss://paintirl-server.herokuapp.com";
+	if(location.origin == "https://paint.coso.cloud"){
+        HOST = "wss://paint.coso.cloud/ws";
     }else{
         HOST = "ws://localhost:3000";
         debug = true;
