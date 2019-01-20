@@ -1,6 +1,3 @@
-// paper js install
-
-
 var debug = false;
 function p(txt){
     if(debug){
@@ -105,13 +102,15 @@ var playersQueue = new Vue({
     }
 })
 
-var myp5, prev;
+var prev;
 var myid, nickname, queuePos;
 var ws;
 var soyArtista = false;
 var playersPaths;
+var myPaths;
 
 var totalInk, currArtistInk;
+var inkRect;
 var clientOptions;
 
 function GetStatus(){
@@ -162,7 +161,6 @@ $(document).ready(function(){
     // Listen for messages
     ws.addEventListener('message', function (event) {
         let data = JSON.parse(event.data)
-
         switch(data.action){
             case "login":
                 myid = data.id;
@@ -237,9 +235,7 @@ $(document).ready(function(){
                         let _x = data.x * 800;
                         let _y = data.y * 800;
                         let p = new Point(_x, _y);
-                        if(p !== null){
-                            playersPaths.lastChild.add(p);
-                        }
+                        playersPaths.lastChild.add(p);
                     }
                 }
             break;
@@ -271,6 +267,7 @@ $(document).ready(function(){
                 role: "player"
             };
             ws.send(JSON.stringify(msg));
+
         }
     });
 
@@ -311,6 +308,8 @@ function EndArtistTime(){
     $("#restart").removeClass("hide");
     $("body").removeClass("soyArtista");
     startedDrawing = false;
+
+    //GuardarDibujoEnServer() // TODO Testear : 0
 }
 
 
@@ -319,10 +318,8 @@ window.addEventListener("resize", onResize);
 var safeArea;
 var squareSide;
 var myCanvas;
-var isSetup = true;
 
 var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
-var initialCanvasSize; // TODO: borrar
 
 var mXpos; // Mouse relative to canvas
 var mYpos;
@@ -338,7 +335,6 @@ function onResize(){
         squareSide = safeWidth;
     }
 
-
     $(canvas).css("width", squareSide);
     $(canvas).css("height", squareSide);
 
@@ -347,21 +343,15 @@ function onResize(){
     $("#ytmask").css("height",squareSide);
 
     canvasInnerSize = $("canvas").innerWidth();
-    isSetup = false;
 }
 
 
 var startedDrawing = false;
-
+var startTime = true;
 
 window.onload = function() {
     canvas = document.getElementById('tile');
     paper.setup(canvas);
-
-
-
-
-
     safeArea = $("#safe-area");
 
     onResize();
@@ -393,6 +383,7 @@ window.onload = function() {
       }
       mXpos -= obj_left;
       mYpos -= obj_top;
+      //console.log(mXpos, mYpos)
       // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
       //p(mXpos, mYpos)
     }
@@ -400,28 +391,67 @@ window.onload = function() {
 
     with(paper){
 
-        playersPaths = new Group();
-        playersPaths.style = {
-            strokeColor: '#000000',
-        	strokeWidth: 100,
+        // Paths
+        project.currentStyle = {
+            strokeColor: 'black',
+            strokeWidth: 3,
             strokeCap : 'round',
             strokeJoin : 'round',
         }
-        playersPaths.strokeWidth = 10;
+        //
+        // myPaths
         let p = new Path();
+        myPaths = new Group();
+        myPaths.addChild(p); // hack raro para evitar un error
+        //
+        // PlayersPaths
+        playersPaths = new Group();
+        p = new Path();
         playersPaths.addChild(p); // hack raro para evitar un error
+        playersPaths.style = {
+            strokeColor: 'red',
+            strokeWidth: 2,
+        }
+
+
+        inkRect = new Shape.Rectangle({
+            from: [0, 0],
+            to: [100, 50],
+            fillColor: 'red'
+        });
+
+        // inkRect.set({ size: [800,40] })
 
         var tool = new Tool();
         tool.minDistance = 10;
-        var lineas = [];
+        var decimalDetail = 4;
         var prevX, prevY;
-        var newLine = false;
 
         tool.onMouseDown = function(event) {
+
             if(soyArtista){
                 if(!startedDrawing){
-                    startedDrawing = false;
+                    startedDrawing = true;
                 }
+
+                var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
+                var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
+
+                // Lo guardo en mis paths
+                let path = new Path();
+                path.strokeColor = '#43c585';
+                path.strokeWidth = 2
+                let point = new Point(normalX*800,normalY*800);
+                path.add( point);
+                myPaths.addChild(path);
+                // Y en los de player
+                path = new Path();
+                path.add( point);
+                playersPaths.addChild(path);
+
+                let msg = {action:"linestart", x:parseFloat(normalX.toFixed(decimalDetail)), y: parseFloat(normalY.toFixed(decimalDetail))};
+                ws.send(JSON.stringify(msg))
+
             }
         }
 
@@ -429,27 +459,23 @@ window.onload = function() {
             // Add a point to the path every time the mouse is dragged
             if(soyArtista){
                 if(!startedDrawing){
-                    p.startTime = new Date().getTime();
+                    startTime = new Date().getTime();
                     startedDrawing = true;
                 }
-
                 // Mouse position. Normalized 0 <-> 1
                 var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
                 var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
 
                 if(normalX != prevX || normalY != prevY){
                     // Evito dibujar si el mouse no se movio
-                    let decimalDetail = 8;
-                    if(newLine){
-                        ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
-                        // lineas.push([])
-                        // playersLines.push([])
-                        newLine = false;
-                    }else{
-                        ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
-                        // lineas[lineas.length-1].push([normalX, normalY]);
-                        // playersLines[playersLines.length-1].push([normalX, normalY]);
-                    }
+                    let msg = {action:"vertex", x:parseFloat(normalX.toFixed(decimalDetail)), y: parseFloat(normalY.toFixed(decimalDetail))}
+                    ws.send(JSON.stringify(msg))
+
+                    let point = new Point(normalX*800,normalY*800)
+                    myPaths.lastChild.add(point);
+                    playersPaths.lastChild.add(point)
+
+
                     prevX = normalX;
                     prevY = normalY;
                 } // if(normalX != prevX || normalY != prevY)
@@ -457,10 +483,10 @@ window.onload = function() {
         }
 
         tool.onMouseUp = function(event){
-            newLine = true;
             ws.send(JSON.stringify({action:"lineend"}))
         }
     }
+
 
 }
 
@@ -544,27 +570,20 @@ var sketch = function( p ) {
         for(let i = 0; i < p.lineas.length; i++){
             for(let j = 0; j < p.lineas[i].length-1; j++){
                 p.line(
-                    p.lineas[i][j][0] * initialCanvasSize,  // x1
-                    p.lineas[i][j][1] * initialCanvasSize,  // y1
-                    p.lineas[i][j+1][0] * initialCanvasSize,// x2
-                    p.lineas[i][j+1][1] * initialCanvasSize,// y2
+
                 );
             }
         }
     }
 
     // Render Dibujos de los otros
-    p.stroke(0);
-    p.strokeWeight(p.map(initialCanvasSize, 100, 1000, 1, 3))
+
     // if(playersLines.length > 0){
     //     for(let i = 0; i < playersLines.length; i++){
     //         // Linea
     //         for(let j = 0; j < playersLines[i].length-1; j++){
     //             p.line(
-    //               playersLines[i][j][0] * initialCanvasSize,    // x1
-    //               playersLines[i][j][1] * initialCanvasSize,    // y2
-    //               playersLines[i][j+1][0] * initialCanvasSize,  // x2
-    //               playersLines[i][j+1][1] * initialCanvasSize,  // y2
+
     //             );
     //         }
     //     }
@@ -575,8 +594,8 @@ var sketch = function( p ) {
     // Render linea de tinta
     p.fill(0, 0, 0, 160);
     p.stroke(00, 0, 0);
-    let inkBarWidth = p.map(currArtistInk,0,totalInk,0, initialCanvasSize)
-    p.rect(0, .98 * initialCanvasSize, inkBarWidth, .2*initialCanvasSize)
+    let inkBarWidth = p.map(currArtistInk,0,totalInk,0, 800)
+    p.rect(0, .98 * 800, inkBarWidth, .2*800)
 
 
     }; // p.draw
@@ -584,7 +603,7 @@ var sketch = function( p ) {
 
 function GuardarDibujoEnServer(){
     let endTime = new Date().getTime();
-    let elapsedTime =  endTime - myp5.startTime;
+    let elapsedTime =  endTime - startTime;
     elapsedTime /= 1000;
 
     p("saving to server");
@@ -592,7 +611,7 @@ function GuardarDibujoEnServer(){
         action      : "newtile",
         userName    : nickname,
         elapsedTime : elapsedTime,
-        puntos      : JSON.stringify(JSON.stringify(myp5.puntos))
+        //puntos      : JSON.stringify(JSON.stringify(myp5.puntos))
 
     }).done(function( data ) {
           p( data );
@@ -600,6 +619,24 @@ function GuardarDibujoEnServer(){
               location.reload();
           }
     });
+}
+
+
+function resizeDimensions(elem,width,height){
+    with(paper){
+        //calc scale coefficients and store current position
+        var scaleX = width/elem.bounds.width;
+        var scaleY = height/elem.bounds.height;
+        var prevPos = new Point(elem.bounds.x,elem.bounds.y);
+
+        //apply calc scaling
+        elem.scale(scaleX,scaleY);
+
+        //reposition the elem to previous pos(scaling moves the elem so we reset it's position);
+        var newPos = prevPos + new Point(elem.bounds.width/2,elem.bounds.height/2);
+        elem.position = newPos;
+    }
+
 }
 
 function map(x, in_min, in_max, out_min, out_max)
