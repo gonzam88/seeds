@@ -7,11 +7,12 @@ function p(txt){
 
 var isYtReady = false;
 var isDomReady = false;
-var isPaperReady = false;
+var clientOptions;
+
 function EstaReady(){
-	if(!isYtReady || !isDomReady || !isPaperReady) return;
+	if(!isYtReady || !isDomReady) return;
 	$("#loadingUi").addClass("hide");
-	console.log("todo esta ready")
+	console.log("ready ready!")
 }
 
 // YT Control
@@ -24,17 +25,24 @@ function InitYoutubeAPI(){
     tag.id = "youtubeScript";
     var firstScriptTag = document.getElementsByTagName("script")[1];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-	isYtReady = true;
-	EstaReady();
 }
 
+var tengoIdVideo = false;
+var playerEstaCargado = false;
 
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
-    let myvideoid = clientOptions.videoId || "";
+    playerEstaCargado = true;
+	CargarNuevoVideo()
+}
 
-    player = new YT.Player("ytplayer", {
+
+function CargarNuevoVideo(){
+	if(!tengoIdVideo || !playerEstaCargado) return;
+
+	let myvideoid = clientOptions.videoId;
+
+	player = new YT.Player("ytplayer", {
         width: "640",
         videoId: myvideoid,
         playerVars: {
@@ -50,13 +58,16 @@ function onYouTubeIframeAPIReady() {
             onStateChange: onPlayerStateChange
         }
     });
+
+	isYtReady = true;
+	EstaReady();
 }
+
 // Player ready handler. Autoplay video when player is ready
 function onPlayerReady(event) {
-
-
+	player.mute();
     player.playVideo()
-    player.mute();
+
     //player.setPlaybackRate(rate - 0.25);
     //player.setVolume(volume + 5);
     //player.pauseVideo(); });
@@ -65,8 +76,8 @@ function onPlayerReady(event) {
 
 // Video state change handler.
 function onPlayerStateChange(event) {
-
 }
+
 function YouTubeGetID(url){
   var ID = '';
   url = url.replace(/(>|<)/gi,'').split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
@@ -123,7 +134,7 @@ var myPaths;
 
 var totalInk, currArtistInk;
 var inkRect;
-var clientOptions;
+
 
 function GetStatus(){
     ws.send(JSON.stringify({action:"status"}))
@@ -136,15 +147,69 @@ function TerminarDibujo(){
     }
 }
 
-$(document).ready(function(){
-    // start
-    // Cargo el nombre ya guardado
-    if(localStorage.getItem("nickname")){
-        login.nickname = localStorage.getItem("nickname");
-        login.changed();
+function StartArtistTime(){
+    p("Ahora dibujo yo");
+    soyArtista = true;
+    $("canvas:hover").css("cursor","crosshair");
+    $("body").addClass("soyArtista");
+	inkRect.set({ size: [810,40] })
+
+    $("#tuturno").addClass("visible").delay(2000).queue(function(next){
+        $(this).removeClass('visible');
+        next();
+    });
+}
+
+function EndArtistTime(){
+    p("Terminé mi dibujo")
+    soyArtista = false;
+    $("#restart").removeClass("hide");
+    $("body").removeClass("soyArtista");
+    startedDrawing = false;
+	inkRect.set({ size: [0,40] })
+    //GuardarDibujoEnServer() // TODO Testear : 0
+}
+
+
+window.addEventListener("resize", onResize);
+
+var safeArea;
+var squareSide;
+var myCanvas;
+
+var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
+
+var mXpos; // Mouse relative to canvas
+var mYpos;
+var canvas;
+
+function onResize(){
+    let safeWidth = safeArea.width();
+    let safeHeight = safeArea.height();
+
+    if(safeWidth > safeHeight){
+        squareSide = safeHeight;
+    }else{
+        squareSide = safeWidth;
     }
 
-    var HOST;
+    $(canvas).css("width", squareSide);
+    $(canvas).css("height", squareSide);
+
+    // YT Player
+    $("#ytmask").css("width",squareSide+5);
+    $("#ytmask").css("height",squareSide);
+
+    canvasInnerSize = $("canvas").innerWidth();
+}
+
+
+var startedDrawing = false;
+var startTime = true;
+var borrame;
+
+function InitSocket(){
+	var HOST;
 	if(location.origin == "https://paint.coso.cloud"){
         HOST = "wss://paint.coso.cloud/ws";
     }else{
@@ -197,17 +262,18 @@ $(document).ready(function(){
             break;
             case "clientOptions":
                 clientOptions = data.clientOptions;
+				tengoIdVideo = true;
 
-                if(player !== undefined){
-                    let currYtId = YouTubeGetID(player.getVideoUrl());
-                    if(clientOptions.videoId != currYtId){
-                        player.loadVideoById(clientOptions.videoId);
-                    }
-                }else{
-                    InitYoutubeAPI();
-                }
+				if(isYtReady){
+					let currYtId = YouTubeGetID(player.getVideoUrl());
+					if(isYtReady && clientOptions.videoId != currYtId){
+						player.loadVideoById(clientOptions.videoId);
+					}
+				}else{
+					CargarNuevoVideo();
+				}
+
                 $("#ytplayer").css("transform",`scale(${clientOptions.videoScale})`)
-
 
             break;
             case "queuelist":
@@ -298,109 +364,17 @@ $(document).ready(function(){
             ws.send(JSON.stringify(msg));
         }
     })
-
-	isDomReady = true;
-	EstaReady();
-})
-
-function StartArtistTime(){
-    p("Ahora dibujo yo");
-    soyArtista = true;
-    $("canvas:hover").css("cursor","crosshair");
-    $("body").addClass("soyArtista");
-	inkRect.set({ size: [810,40] })
-
-    $("#tuturno").addClass("visible").delay(2000).queue(function(next){
-        $(this).removeClass('visible');
-        next();
-    });
 }
 
-function EndArtistTime(){
-    p("Terminé mi dibujo")
-    soyArtista = false;
-    $("#restart").removeClass("hide");
-    $("body").removeClass("soyArtista");
-    startedDrawing = false;
-	inkRect.set({ size: [0,40] })
-    //GuardarDibujoEnServer() // TODO Testear : 0
-}
-
-
-window.addEventListener("resize", onResize);
-
-var safeArea;
-var squareSide;
-var myCanvas;
-
-var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
-
-var mXpos; // Mouse relative to canvas
-var mYpos;
-var canvas;
-
-function onResize(){
-    let safeWidth = safeArea.width();
-    let safeHeight = safeArea.height();
-
-    if(safeWidth > safeHeight){
-        squareSide = safeHeight;
-    }else{
-        squareSide = safeWidth;
-    }
-
-    $(canvas).css("width", squareSide);
-    $(canvas).css("height", squareSide);
-
-    // YT Player
-    $("#ytmask").css("width",squareSide+5);
-    $("#ytmask").css("height",squareSide);
-
-    canvasInnerSize = $("canvas").innerWidth();
-}
-
-
-var startedDrawing = false;
-var startTime = true;
-var borrame;
-
-window.onload = function() {
-	console.log("onload")
-    canvas = document.getElementById('tile');
+function InitPaper(){
+	canvas = document.getElementById('tile');
     paper.setup(canvas);
     safeArea = $("#safe-area");
 
     onResize();
     canvasInnerSize = $("canvas").innerWidth();
 
-    // function findObjectCoords(mouseEvent)
-    // {
-	// 	console.log('findcoord', mouseEvent)
-    //   var obj = document.getElementById("tile");
-    //   var obj_left = 0;
-    //   var obj_top = 0;
-	//
-    //   while (obj.offsetParent)
-    //   {
-    //     obj_left += obj.offsetLeft;
-    //     obj_top += obj.offsetTop;
-    //     obj = obj.offsetParent;
-    //   }
-    //   if (mouseEvent)
-    //   {
-    //     //FireFox
-    //     mXpos = mouseEvent.pageX;
-    //     mYpos = mouseEvent.pageY;
-    //   }
-    //   mXpos -= obj_left;
-    //   mYpos -= obj_top;
-    //   // console.log(mXpos, mYpos)
-    //   // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
-    // }
-    // document.getElementById("tile").onmousemove = findObjectCoords;
-
     with(paper){
-
         // Paths
         project.currentStyle = {
             strokeColor: 'black',
@@ -494,7 +468,6 @@ window.onload = function() {
 					}
 					mXpos = event.event.touches[0].pageX - obj_left;
 					mYpos = event.event.touches[0].pageY -  obj_top;
-					console.log('mobile',mXpos,mYpos)
 				}else{
 					mXpos = event.event.offsetX;
 					mYpos = event.event.offsetY;
@@ -502,8 +475,6 @@ window.onload = function() {
 
                 var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
                 var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
-
-				console.log('normal',normalX,normalY)
 
                 if(normalX != prevX || normalY != prevY){
                     // Evito dibujar si el mouse no se movio
@@ -520,166 +491,27 @@ window.onload = function() {
                 } // if(normalX != prevX || normalY != prevY)
             }
         }
-
         tool.onMouseUp = function(event){
             ws.send(JSON.stringify({action:"lineend"}))
         }
     }
+}
 
-	isPaperReady = true;
+window.onload = function() {
+	// start
+	InitYoutubeAPI()
+
+    // Cargo el nombre ya guardado
+    if(localStorage.getItem("nickname")){
+        login.nickname = localStorage.getItem("nickname");
+        login.changed();
+    }
+
+	InitSocket();
+	InitPaper();
+
+	isDomReady = true;
 	EstaReady();
-
-}
-
-
-function onMouseDrag(event) {
-	console.log('func',event)
-}
-
-var sketch = function( p ) {
-
-  var cnt = 0;
-  var prevX, prevY;
-  p.puntos = [];
-  var startedDrawing = false;
-  var hasDrawn = false;
-  var startInk = 9999500; // TODO server side
-  var ink = startInk;
-  var linesDetail = 8; // Menos es màs detalle y más puntos
-
-  p.lineas = []
-  var newLine = false;
-
-  p.draw = function() {
-
-      // Calculos de mi dibujo
-      if(soyArtista){
-          var normalX = p.map(mXpos, 0, canvasInnerSize, 0, 1)
-          var normalY = p.map(mYpos, 0, canvasInnerSize, 0, 1)
-
-          if (p.mouseIsPressed === true && !hasDrawn) {
-
-            if(!startedDrawing){
-                p.startTime = new Date().getTime();
-                startedDrawing = true;
-            }
-            let newPosVec = p.createVector(normalX, normalY);
-            let oldPosVec = p.createVector(prevX, prevY);
-            let movement  = newPosVec.dist(oldPosVec);
-            if(movement < linesDetail){
-                // Evito dibujar si el movimiento es poco
-                if(normalX != prevX || normalY != prevY){
-                    // Evito dibujar si el mouse no se movio
-                    if(ink > 0){
-                        let decimalDetail = 8;
-                        if(newLine){
-                            ws.send(JSON.stringify({action:"linestart", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
-                            p.lineas.push([])
-                            // playersLines.push([])
-                            newLine = false;
-                        }else{
-                            ws.send(JSON.stringify({action:"vertex", x:normalX.toFixed(decimalDetail), y: normalY.toFixed(decimalDetail)}))
-                            p.lineas[p.lineas.length-1].push([normalX, normalY]);
-                            // playersLines[playersLines.length-1].push([normalX, normalY]);
-                        }
-                        prevX = normalX;
-                        prevY = normalY;
-                        ink--;
-
-                    }else{
-                        if(!hasDrawn){
-                            hasDrawn = true;
-                        }
-                    }
-                }
-            } // lines detail
-        }else{
-            if(!newLine){
-                newLine = true;
-                ws.send(JSON.stringify({action:"lineend"}))
-            }
-
-        }
-    } // if soy artista
-
-    //
-    // RENDERS
-    p.clear();
-
-    // Render mi Dibujo
-    p.stroke("#43c585");
-    p.strokeWeight(1);
-    if(p.lineas.length > 0){
-        for(let i = 0; i < p.lineas.length; i++){
-            for(let j = 0; j < p.lineas[i].length-1; j++){
-                p.line(
-
-                );
-            }
-        }
-    }
-
-    // Render Dibujos de los otros
-
-    // if(playersLines.length > 0){
-    //     for(let i = 0; i < playersLines.length; i++){
-    //         // Linea
-    //         for(let j = 0; j < playersLines[i].length-1; j++){
-    //             p.line(
-
-    //             );
-    //         }
-    //     }
-    // }
-
-
-
-    // Render linea de tinta
-    p.fill(0, 0, 0, 160);
-    p.stroke(00, 0, 0);
-    let inkBarWidth = p.map(currArtistInk,0,totalInk,0, 800)
-    p.rect(0, .98 * 800, inkBarWidth, .2*800)
-
-
-    }; // p.draw
-}; // sketch
-
-function GuardarDibujoEnServer(){
-    let endTime = new Date().getTime();
-    let elapsedTime =  endTime - startTime;
-    elapsedTime /= 1000;
-
-    p("saving to server");
-    $.post( window.location, {
-        action      : "newtile",
-        userName    : nickname,
-        elapsedTime : elapsedTime,
-        //puntos      : JSON.stringify(JSON.stringify(myp5.puntos))
-
-    }).done(function( data ) {
-          p( data );
-          if(data.status == "ok"){
-              location.reload();
-          }
-    });
-}
-
-
-function resizeDimensions(elem,width,height){
-    with(paper){
-        //calc scale coefficients and store current position
-        var scaleX = width/elem.bounds.width;
-        var scaleY = height/elem.bounds.height;
-        var prevPos = new Point(elem.bounds.x,elem.bounds.y);
-
-        //apply calc scaling
-        elem.scale(scaleX,scaleY);
-
-        //reposition the elem to previous pos(scaling moves the elem so we reset it's position);
-        var newPos = prevPos + new Point(elem.bounds.width/2,elem.bounds.height/2);
-        elem.position = newPos;
-    }
-
 }
 
 function map(x, in_min, in_max, out_min, out_max)
