@@ -227,9 +227,13 @@ $(document).ready(function(){
             break;
 
             case "vertex":
-                currArtistInk = data.ink;
+				// modifico el UI de la tinta
+				currArtistInk = data.ink;
+				let inkBarWidth = map(currArtistInk,0,totalInk,0, 810)
+				inkRect.set({ size: [inkBarWidth,40] })
+
                 if(soyArtista){
-                    if(currArtistInk <= 0){EndArtistTime();}
+                    if(currArtistInk <= 0) EndArtistTime();
                 }else{
                     with(paper){
                         let _x = data.x * 800;
@@ -295,6 +299,7 @@ function StartArtistTime(){
     soyArtista = true;
     $("canvas:hover").css("cursor","crosshair");
     $("body").addClass("soyArtista");
+	inkRect.set({ size: [810,40] })
 
     $("#tuturno").addClass("visible").delay(2000).queue(function(next){
         $(this).removeClass('visible');
@@ -308,7 +313,7 @@ function EndArtistTime(){
     $("#restart").removeClass("hide");
     $("body").removeClass("soyArtista");
     startedDrawing = false;
-
+	inkRect.set({ size: [0,40] })
     //GuardarDibujoEnServer() // TODO Testear : 0
 }
 
@@ -415,12 +420,13 @@ window.onload = function() {
 
 
         inkRect = new Shape.Rectangle({
-            from: [0, 0],
-            to: [100, 50],
-            fillColor: 'red'
+            from: [0, 770],
+            to: [810, 810],
+            fillColor: '#00000096',
+			strokeWidth: 0
         });
 
-        // inkRect.set({ size: [800,40] })
+
 
         var tool = new Tool();
         tool.minDistance = 10;
