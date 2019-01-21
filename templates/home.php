@@ -122,7 +122,7 @@ if($seg == "prev"){
     </div>
 
 	<div id="loadingUi" class="">
-        <p><?php _t("Cargando...") ?><p>
+        <p><?php _t("Loading...") ?><p>
 		<img src="<?php echo $config->urls->templates; ?>loading.svg">
     </div>
 
@@ -146,7 +146,7 @@ if($seg == "prev"){
         </div>
     </div>
 
-
+	<script src="https://www.youtube.com/player_api"></script>
     <script src="<?php echo $config->urls->templates; ?>dependencies/jquery-3.1.1.min.js"></script>
     <!-- <script src="<?php //echo $config->urls->templates; ?>dependencies/p5.min.js"></script> -->
     <script src="<?php echo $config->urls->templates; ?>dependencies/paperjs-v0.12.0/paper-full.min.js"></script>

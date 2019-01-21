@@ -19,7 +19,8 @@ function _t($label) {
     'nobody´s<br />drawing 😭'  => 'nadie está<br /> dibujando 😭',
     'When it´s your turn, you can draw over video. Eventually, it will be drawn IRL'
     => 'Cuando sea tu turno, dibujá sobre el video. Eventualmente será dibujado IRL',
-    'you draw now!'         => 'dibujas vos!'
+    'you draw now!'         => 'dibujas vos!',
+	'Loading...'			=> 'Cargando...'
 
   );
   echo isset($labels[$label]) ? $labels[$label] : $label;
