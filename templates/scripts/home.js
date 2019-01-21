@@ -21,7 +21,7 @@ var player;
 // This code loads the IFrame Player API code asynchronously. This is the Youtube-recommended script loading method
 function InitYoutubeAPI(){
     var tag = document.createElement("script");
-    tag.src = "http://youtube.com/iframe_api";
+    tag.src = "https://youtube.com/iframe_api";
     tag.id = "youtubeScript";
     var firstScriptTag = document.getElementsByTagName("script")[1];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
