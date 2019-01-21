@@ -362,8 +362,10 @@ function onResize(){
 
 var startedDrawing = false;
 var startTime = true;
+var borrame;
 
 window.onload = function() {
+	console.log("onload")
     canvas = document.getElementById('tile');
     paper.setup(canvas);
     safeArea = $("#safe-area");
@@ -371,37 +373,31 @@ window.onload = function() {
     onResize();
     canvasInnerSize = $("canvas").innerWidth();
 
-    function findObjectCoords(mouseEvent)
-    {
-      var obj = document.getElementById("tile");
-      var obj_left = 0;
-      var obj_top = 0;
-
-      while (obj.offsetParent)
-      {
-        obj_left += obj.offsetLeft;
-        obj_top += obj.offsetTop;
-        obj = obj.offsetParent;
-      }
-      if (mouseEvent)
-      {
-        //FireFox
-        mXpos = mouseEvent.pageX;
-        mYpos = mouseEvent.pageY;
-      }
-      else
-      {
-        //IE
-        mXpos = window.event.x + document.body.scrollLeft - 2;
-        mYpos = window.event.y + document.body.scrollTop - 2;
-      }
-      mXpos -= obj_left;
-      mYpos -= obj_top;
-      //console.log(mXpos, mYpos)
-      // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
-      //p(mXpos, mYpos)
-    }
-    document.getElementById("tile").onmousemove = findObjectCoords;
+    // function findObjectCoords(mouseEvent)
+    // {
+	// 	console.log('findcoord', mouseEvent)
+    //   var obj = document.getElementById("tile");
+    //   var obj_left = 0;
+    //   var obj_top = 0;
+	//
+    //   while (obj.offsetParent)
+    //   {
+    //     obj_left += obj.offsetLeft;
+    //     obj_top += obj.offsetTop;
+    //     obj = obj.offsetParent;
+    //   }
+    //   if (mouseEvent)
+    //   {
+    //     //FireFox
+    //     mXpos = mouseEvent.pageX;
+    //     mYpos = mouseEvent.pageY;
+    //   }
+    //   mXpos -= obj_left;
+    //   mYpos -= obj_top;
+    //   // console.log(mXpos, mYpos)
+    //   // document.getElementById("objectCoords").innerHTML = mXpos + ", " + mYpos;
+    // }
+    // document.getElementById("tile").onmousemove = findObjectCoords;
 
     with(paper){
 
@@ -449,8 +445,8 @@ window.onload = function() {
                     startedDrawing = true;
                 }
 
-                var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
-                var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
+                var normalX = map(event.offsetX, 0, canvasInnerSize, 0, 1)
+                var normalY = map(event.offsetY, 0, canvasInnerSize, 0, 1)
 
                 // Lo guardo en mis paths
                 let path = new Path();
@@ -469,17 +465,45 @@ window.onload = function() {
 
             }
         }
+		var mXpos, mYpos;
 
         tool.onMouseDrag = function(event) {
+			borrame=event;
+
             // Add a point to the path every time the mouse is dragged
             if(soyArtista){
                 if(!startedDrawing){
                     startTime = new Date().getTime();
                     startedDrawing = true;
                 }
-                // Mouse position. Normalized 0 <-> 1
+
+				// Mouse position. Normalized 0 <-> 1
+
+				if(event.event.type == "touchmove"){
+					let absX = event.event.touches[0].pageX
+
+					var obj = canvas;
+					var obj_left = 0;
+				    var obj_top = 0;
+
+					while (obj.offsetParent)
+					{
+						obj_left += obj.offsetLeft;
+						obj_top += obj.offsetTop;
+						obj = obj.offsetParent;
+					}
+					mXpos = event.event.touches[0].pageX - obj_left;
+					mYpos = event.event.touches[0].pageY -  obj_top;
+					console.log('mobile',mXpos,mYpos)
+				}else{
+					mXpos = event.event.offsetX;
+					mYpos = event.event.offsetY;
+				}
+
                 var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
                 var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
+
+				console.log('normal',normalX,normalY)
 
                 if(normalX != prevX || normalY != prevY){
                     // Evito dibujar si el mouse no se movio
@@ -508,7 +532,9 @@ window.onload = function() {
 }
 
 
-
+function onMouseDrag(event) {
+	console.log('func',event)
+}
 
 var sketch = function( p ) {
 
