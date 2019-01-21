@@ -100,13 +100,14 @@ if($seg == "prev"){
             </div>
         </div>
     </div>
+
     <div id="tuturno">
         <?php _t("you draw now!")?>
     </div>
+
     <div id="pasarturno">
         <button onclick="TerminarDibujo();">terminar dibujo</button>
     </div>
-
 
     <div id="playersQueue">
         <div v-if="artist != '' || (typeof player != 'undefined' && player.length > 0)">
@@ -118,6 +119,11 @@ if($seg == "prev"){
         <div v-else>
             <?php _t("nobody´s<br />drawing 😭") ?>
         </div>
+    </div>
+
+	<div id="loadingUi" class="">
+        <p><?php _t("Cargando...") ?><p>
+		<img src="<?php echo $config->urls->templates; ?>loading.svg">
     </div>
 
     <div id="restart" class="hide">

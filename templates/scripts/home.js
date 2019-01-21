@@ -5,6 +5,15 @@ function p(txt){
     }
 }
 
+var isYtReady = false;
+var isDomReady = false;
+var isPaperReady = false;
+function EstaReady(){
+	if(!isYtReady || !isDomReady || !isPaperReady) return;
+	$("#loadingUi").addClass("hide");
+	console.log("todo esta ready")
+}
+
 // YT Control
 var player;
 
@@ -15,6 +24,9 @@ function InitYoutubeAPI(){
     tag.id = "youtubeScript";
     var firstScriptTag = document.getElementsByTagName("script")[1];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+	isYtReady = true;
+	EstaReady();
 }
 
 
@@ -262,16 +274,17 @@ $(document).ready(function(){
         }
     });
 
+	var hasLoggedIn = false;
     $("#comenzar").click(function(){
         // socket connection
-        if (ws.readyState === ws.OPEN) {
+        if (ws.readyState === ws.OPEN && !hasLoggedIn) {
             let msg = {
                 action: "login",
                 nickname: login.nickname,
                 role: "player"
             };
             ws.send(JSON.stringify(msg));
-
+			hasLoggedIn = true;
         }
     });
 
@@ -286,12 +299,8 @@ $(document).ready(function(){
         }
     })
 
-
-    prev = $.get("children",function( data ) {
-        prev = data;
-        // p(prev);
-        // myp5 = new p5(sketch); // instancia del sketch. La unica que voy a necesitar.
-    });
+	isDomReady = true;
+	EstaReady();
 })
 
 function StartArtistTime(){
@@ -429,7 +438,7 @@ window.onload = function() {
 
 
         var tool = new Tool();
-        tool.minDistance = 10;
+        tool.minDistance = 5;
         var decimalDetail = 4;
         var prevX, prevY;
 
@@ -493,6 +502,8 @@ window.onload = function() {
         }
     }
 
+	isPaperReady = true;
+	EstaReady();
 
 }
 

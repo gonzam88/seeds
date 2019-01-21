@@ -80,6 +80,13 @@ a{
 	border: 5px solid #61deb6;
 }
 
+#tile:hover{
+	cursor: wait;
+}
+.soyArtista #tile:hover{
+	cursor: crosshair;
+}
+
 #container{
 	padding: 5px;
 }
@@ -112,6 +119,24 @@ a{
     background-color: #61deb6;
     border-radius: 40px;
     padding: 20px;
+}
+
+#loadingUi{
+	background-color: #e2e2e2;
+	position: absolute;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	text-align: center;
+	z-index: 30;
+}
+#loadingUi img{
+	width: 30px;
+    margin-top: 20px;
 }
 
 #formulario{
