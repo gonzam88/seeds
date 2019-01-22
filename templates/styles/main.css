@@ -245,7 +245,6 @@ button:hover{
 #tuturno{
 	text-align: center;
     margin-top: 10px;
-    color: white;
 	display: none;
 }
 #tuturno.visible{
