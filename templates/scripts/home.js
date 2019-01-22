@@ -14,6 +14,7 @@ var isLoaded = {
 		this._youtube = val;
 		if(val){
 			console.log("YouTube api ready");
+			loadingVue.loadedElements++;
 			this.IsEveryThingLoaded();
 		}
 	},
@@ -24,6 +25,7 @@ var isLoaded = {
 		this._video = val;
 		if(val){
 			console.log("video loaded");
+			loadingVue.loadedElements++;
 			this.IsEveryThingLoaded();
 		}
 	},
@@ -31,6 +33,7 @@ var isLoaded = {
 		this._dom = val;
 		if(val){
 			console.log("dom ready");
+			loadingVue.loadedElements++;
 			this.IsEveryThingLoaded();
 		}
 	},
@@ -38,6 +41,7 @@ var isLoaded = {
 		console.log("server conf received");
 		if(val){
 			this._serverconf = val;
+			loadingVue.loadedElements++;
 			this.IsEveryThingLoaded();
 		}
 	},
@@ -115,7 +119,13 @@ function onPlayerStateChange(event) {
     3 (buffering)
     5 (video cued)
 	**/
+
+	if(event.data == 3){
+		// buffering
+		loadingVue.loadedElements += 0.5; // es un chiste pero es verdad
+	}
 	if (event.data == 1) {
+		// started playing
 		isLoaded.video = true;
     }
 }
@@ -165,6 +175,14 @@ var playersQueue = new Vue({
             return "soyyo"
         }
     }
+})
+
+var loadingVue = new Vue({
+	el: '#loadingUi',
+	data: {
+		loadedElements: 0,
+		totalElements: 4
+	}
 })
 
 var prev;

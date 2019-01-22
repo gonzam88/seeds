@@ -20,7 +20,7 @@ function _t($label) {
     'When it´s your turn, you can draw over video. Eventually, it will be drawn IRL'
     => 'Cuando sea tu turno, dibujá sobre el video. Eventualmente será dibujado IRL',
     'you draw now!'         => 'dibujas vos!',
-	'Loading...'			=> 'Cargando...',
+	'Loading'				=> 'Cargando',
 	'Server is currently off'=> 'El servidor se encuentra apagado'
 
   );

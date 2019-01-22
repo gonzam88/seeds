@@ -122,7 +122,7 @@ if($seg == "prev"){
     </div>
 
 	<div id="loadingUi" class="">
-        <p><?php _t("Loading...") ?><p>
+        <p><?php _t("Loading") ?> ({{loadedElements}}/{{totalElements}})...<p>
 		<img src="<?php echo $config->urls->templates; ?>loading.svg">
     </div>
 
