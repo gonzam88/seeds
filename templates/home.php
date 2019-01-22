@@ -151,6 +151,7 @@ if($seg == "prev"){
     </div>
 
     <script src="<?php echo $config->urls->templates; ?>dependencies/jquery-3.1.1.min.js"></script>
+	<script src="<?php echo $config->urls->templates; ?>dependencies/victor.min.js"></script>
     <script src="<?php echo $config->urls->templates; ?>dependencies/paperjs-v0.12.0/paper-full.min.js"></script>
     <!--VUE js production version, optimized for size and speed -->
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>

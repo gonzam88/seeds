@@ -175,6 +175,7 @@ var playersPaths;
 var myPaths;
 
 var totalInk, currArtistInk;
+var myInk;
 var inkRect;
 
 
@@ -192,6 +193,7 @@ function TerminarDibujo(){
 function StartArtistTime(){
     p("Ahora dibujo yo");
     soyArtista = true;
+	myInk = clientOptions.totalInk;
     $("canvas:hover").css("cursor","crosshair");
     $("body").addClass("soyArtista");
 	inkRect.set({ size: [810,40] })
@@ -203,6 +205,8 @@ function StartArtistTime(){
 }
 
 function EndArtistTime(){
+	if(!soyArtista) return; // Puede pasar que yo mismo determine que se me termino la tinta
+
     p("Terminé mi dibujo")
     soyArtista = false;
     $("#restart").removeClass("hide");
@@ -356,7 +360,7 @@ function InitSocket(){
 
             case "vertex":
 				// modifico el UI de la tinta
-				currArtistInk = data.ink;
+				currArtistInk = Math.min(data.ink, myInk);
 				let inkBarWidth = map(currArtistInk,0,totalInk,0, 810)
 				inkRect.set({ size: [inkBarWidth,40] })
 
@@ -458,6 +462,7 @@ function InitPaper(){
         tool.minDistance = 5;
         var decimalDetail = 4;
         var prevX, prevY;
+		var artistLastPoint;
 
 		tool.onMouseDown = function(event) {
 
@@ -484,6 +489,7 @@ function InitPaper(){
                 let msg = {action:"linestart", x:parseFloat(normalX.toFixed(decimalDetail)), y: parseFloat(normalY.toFixed(decimalDetail))};
                 ws.send(JSON.stringify(msg))
 
+				artistLastPoint = new Victor(normalX, normalY)
             }
         }
 
@@ -511,6 +517,12 @@ function InitPaper(){
                     prevX = normalX;
                     prevY = normalY;
                 } // if(normalX != prevX || normalY != prevY)
+
+				// Hago mi calculo local de tinta
+				let newPoint = new Victor(normalX, normalY)
+				let dist = artistLastPoint.distance(newPoint);
+				myInk -= dist;
+				artistLastPoint = newPoint;
 
             }
 
