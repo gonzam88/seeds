@@ -73,39 +73,25 @@ function InitYoutubeAPI(){
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 }
 
-var tengoIdVideo = false;
-
-
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
 	isLoaded.youtube = true;
-	CargarNuevoVideo()
-}
-
-function CargarNuevoVideo(){
-	if(tengoIdVideo && isLoaded.youtube) {
-
-		let myvideoid = clientOptions.videoId;
-
-		player = new YT.Player("ytplayer", {
-	        width: "640",
-	        videoId: myvideoid,
-	        playerVars: {
-	            autoplay: 1,
-	            controls: 0,
-	            rel: 0,
-	            fs: 0,
-	            showinfo: 0,
-	            modestbranding: 1
-	        },
-	        events: {
-	            onReady: onPlayerReady,
-	            onStateChange: onPlayerStateChange
-	        }
-	    });
-
-
-	}
+	player = new YT.Player("ytplayer", {
+        width: "640",
+        videoId: clientOptions.videoId,
+        playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            fs: 0,
+            showinfo: 0,
+            modestbranding: 1
+        },
+        events: {
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
+        }
+    });
 }
 
 // Player ready handler. Autoplay video when player is ready
@@ -328,10 +314,8 @@ function InitSocket(){
 					return;
 				}
 
-				tengoIdVideo = true;
-
 				if(typeof player == "undefined"){
-					CargarNuevoVideo();
+					InitYoutubeAPI();
 
 				}else{
 					let currYtId = YouTubeGetID(player.getVideoUrl());
@@ -539,8 +523,6 @@ function InitPaper(){
 
 window.onload = function() {
 	// start
-	InitYoutubeAPI()
-
     // Cargo el nombre ya guardado
     if(localStorage.getItem("nickname")){
         login.nickname = localStorage.getItem("nickname");
