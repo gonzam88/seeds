@@ -17,6 +17,9 @@ var isLoaded = {
 			this.IsEveryThingLoaded();
 		}
 	},
+	get youtube(){
+		return this._youtube;
+	},
 	set video(val){
 		this._video = val;
 		if(val){
@@ -71,37 +74,38 @@ function InitYoutubeAPI(){
 }
 
 var tengoIdVideo = false;
-var playerEstaCargado = false;
+
 
 // Create youtube player (function called by YouTube API)
 function onYouTubeIframeAPIReady() {
-    playerEstaCargado = true;
+	isLoaded.youtube = true;
 	CargarNuevoVideo()
 }
 
 function CargarNuevoVideo(){
-	if(!tengoIdVideo || !playerEstaCargado) return;
+	if(tengoIdVideo && isLoaded.youtube) {
 
-	let myvideoid = clientOptions.videoId;
+		let myvideoid = clientOptions.videoId;
 
-	player = new YT.Player("ytplayer", {
-        width: "640",
-        videoId: myvideoid,
-        playerVars: {
-            autoplay: 1,
-            controls: 0,
-            rel: 0,
-            fs: 0,
-            showinfo: 0,
-            modestbranding: 1
-        },
-        events: {
-            onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange
-        }
-    });
+		player = new YT.Player("ytplayer", {
+	        width: "640",
+	        videoId: myvideoid,
+	        playerVars: {
+	            autoplay: 1,
+	            controls: 0,
+	            rel: 0,
+	            fs: 0,
+	            showinfo: 0,
+	            modestbranding: 1
+	        },
+	        events: {
+	            onReady: onPlayerReady,
+	            onStateChange: onPlayerStateChange
+	        }
+	    });
 
-	isLoaded.youtube = true;
+
+	}
 }
 
 // Player ready handler. Autoplay video when player is ready
@@ -326,12 +330,12 @@ function InitSocket(){
 
 				tengoIdVideo = true;
 
-				if(player !== null){
+				if(typeof player == "undefined"){
 					CargarNuevoVideo();
 
 				}else{
 					let currYtId = YouTubeGetID(player.getVideoUrl());
-					if(isYtReady && clientOptions.videoId != currYtId){
+					if(clientOptions.videoId != currYtId){
 						player.loadVideoById(clientOptions.videoId);
 					}
 				}
