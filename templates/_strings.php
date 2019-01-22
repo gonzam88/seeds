@@ -15,12 +15,13 @@ function _t($label) {
     'your name'             => 'tu nombre',
     'connection error'      => 'error de conexión',
     'start again'           => 'volver a dibujar',
-    'drawing now:'          => 'dibujando ahora:',
+    'now:'          => 'ahora:',
     'nobody´s<br />drawing 😭'  => 'nadie está<br /> dibujando 😭',
     'When it´s your turn, you can draw over video. Eventually, it will be drawn IRL'
     => 'Cuando sea tu turno, dibujá sobre el video. Eventualmente será dibujado IRL',
     'you draw now!'         => 'dibujas vos!',
-	'Loading...'			=> 'Cargando...'
+	'Loading...'			=> 'Cargando...',
+	'Server is currently off'=> 'El servidor se encuentra apagado'
 
   );
   echo isset($labels[$label]) ? $labels[$label] : $label;

@@ -111,7 +111,7 @@ if($seg == "prev"){
 
     <div id="playersQueue">
         <div v-if="artist != '' || (typeof player != 'undefined' && player.length > 0)">
-            <div v-bind:class="artist[2] "><?php _t("drawing now:") ?><br />{{artist[0]}}</div>
+            <div v-bind:class="artist[2] "><?php _t("now:") ?><br />{{artist[0]}}</div>
             <ol start="2">
                 <li v-for="player in players"  v-bind:class="player[2]">{{ player[0] }}</li>
             </ol>
@@ -125,6 +125,10 @@ if($seg == "prev"){
         <p><?php _t("Loading...") ?><p>
 		<img src="<?php echo $config->urls->templates; ?>loading.svg">
     </div>
+
+	<div id="serverOff" class="hide">
+		<p><?php _t("Server is currently off"); ?> 🤬<p>
+	</div>
 
     <div id="restart" class="hide">
         <a class="circulo" title="<?php _t("start again") ?>" href="#"><i class="fas fa-redo-alt fa-2x"></i></a>

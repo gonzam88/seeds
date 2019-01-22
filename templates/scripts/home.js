@@ -5,16 +5,59 @@ function p(txt){
     }
 }
 
-var isYtReady = false;
-var isDomReady = false;
-var clientOptions;
+var isLoaded = {
+	_youtube: false,
+	_video: false,
+	_dom: false,
+	_serverconf : false,
+	set youtube(val){
+		this._youtube = val;
+		if(val){
+			console.log("YouTube api ready");
+			this.IsEveryThingLoaded();
+		}
+	},
+	set video(val){
+		this._video = val;
+		if(val){
+			console.log("video loaded");
+			this.IsEveryThingLoaded();
+		}
+	},
+	set dom(val){
+		this._dom = val;
+		if(val){
+			console.log("dom ready");
+			this.IsEveryThingLoaded();
+		}
+	},
+	set serverconf(val){
+		console.log("server conf received");
+		if(val){
+			this._serverconf = val;
+			this.IsEveryThingLoaded();
+		}
+	},
 
-function EstaReady(){
-	if(!isYtReady || !isDomReady) return;
-	$("#loadingUi").addClass("hide");
-	console.log("ready ready!")
+	reset : function(){
+		this._youtube = false
+		this._video = false
+		this._dom = false
+		this._serverconf = false
+	},
+	_everyThingLoaded : false,
+
+	IsEveryThingLoaded: function(){
+		if(this._everyThingLoaded) return;
+		if(this._youtube && this._video && this._dom && this._serverconf){
+			console.log("Everything is loaded 🤖");
+			$("#loadingUi").addClass("hide");
+			this._everyThingLoaded = true;
+		}
+	}
 }
 
+var clientOptions;
 // YT Control
 var player;
 
@@ -35,7 +78,6 @@ function onYouTubeIframeAPIReady() {
     playerEstaCargado = true;
 	CargarNuevoVideo()
 }
-
 
 function CargarNuevoVideo(){
 	if(!tengoIdVideo || !playerEstaCargado) return;
@@ -59,8 +101,7 @@ function CargarNuevoVideo(){
         }
     });
 
-	isYtReady = true;
-	EstaReady();
+	isLoaded.youtube = true;
 }
 
 // Player ready handler. Autoplay video when player is ready
@@ -76,6 +117,17 @@ function onPlayerReady(event) {
 
 // Video state change handler.
 function onPlayerStateChange(event) {
+	/** YouTube API
+    -1 (unstarted)
+    0 (ended)
+    1 (playing)
+    2 (paused)
+    3 (buffering)
+    5 (video cued)
+	**/
+	if (event.data == 1) {
+		isLoaded.video = true;
+    }
 }
 
 function YouTubeGetID(url){
@@ -175,12 +227,7 @@ window.addEventListener("resize", onResize);
 
 var safeArea;
 var squareSide;
-var myCanvas;
-
 var canvasInnerSize; // Este es responsive. Cambia cuando cambio el tamaño del documento. Lo uso para normalizar la posicion del mouse
-
-var mXpos; // Mouse relative to canvas
-var mYpos;
 var canvas;
 
 function onResize(){
@@ -203,10 +250,15 @@ function onResize(){
     canvasInnerSize = $("canvas").innerWidth();
 }
 
+function ServerOff(){
+	console.log("El servidor está apagado")
+	$("#serverOff").removeClass("hide");
+	// TODO Intentar reconectar cada 30s
+}
+
 
 var startedDrawing = false;
 var startTime = true;
-var borrame;
 
 function InitSocket(){
 	var HOST;
@@ -225,6 +277,7 @@ function InitSocket(){
     });
     ws.addEventListener('close', function (event) {
         $("#formulario").removeClass("hide");
+
     });
     ws.addEventListener('error', function (event) {
         $("#formulario").removeClass("hide");
@@ -262,17 +315,26 @@ function InitSocket(){
             break;
             case "clientOptions":
                 clientOptions = data.clientOptions;
+				isLoaded.serverconf = true;
+
+				if(clientOptions.isServerOpen){
+					$("#serverOff").addClass("hide");
+				}else{
+					ServerOff()
+					return;
+				}
+
 				tengoIdVideo = true;
 
-				if(isYtReady){
+				if(player !== null){
+					CargarNuevoVideo();
+
+				}else{
 					let currYtId = YouTubeGetID(player.getVideoUrl());
 					if(isYtReady && clientOptions.videoId != currYtId){
 						player.loadVideoById(clientOptions.videoId);
 					}
-				}else{
-					CargarNuevoVideo();
 				}
-
                 $("#ytplayer").css("transform",`scale(${clientOptions.videoScale})`)
 
             break;
@@ -397,7 +459,6 @@ function InitPaper(){
             strokeWidth: 2,
         }
 
-
         inkRect = new Shape.Rectangle({
             from: [0, 770],
             to: [810, 810],
@@ -405,29 +466,27 @@ function InitPaper(){
 			strokeWidth: 0
         });
 
-
-
         var tool = new Tool();
         tool.minDistance = 5;
         var decimalDetail = 4;
         var prevX, prevY;
 
-        tool.onMouseDown = function(event) {
+		tool.onMouseDown = function(event) {
 
             if(soyArtista){
                 if(!startedDrawing){
                     startedDrawing = true;
                 }
 
-                var normalX = map(event.offsetX, 0, canvasInnerSize, 0, 1)
-                var normalY = map(event.offsetY, 0, canvasInnerSize, 0, 1)
+				var normalX = map(event.point.x, 0, canvasInnerSize, 0, 1)
+                var normalY = map(event.point.y, 0, canvasInnerSize, 0, 1)
 
                 // Lo guardo en mis paths
                 let path = new Path();
                 path.strokeColor = '#43c585';
                 path.strokeWidth = 2
                 let point = new Point(normalX*800,normalY*800);
-                path.add( point);
+                path.add( point );
                 myPaths.addChild(path);
                 // Y en los de player
                 path = new Path();
@@ -439,11 +498,8 @@ function InitPaper(){
 
             }
         }
-		var mXpos, mYpos;
 
         tool.onMouseDrag = function(event) {
-			borrame=event;
-
             // Add a point to the path every time the mouse is dragged
             if(soyArtista){
                 if(!startedDrawing){
@@ -451,30 +507,8 @@ function InitPaper(){
                     startedDrawing = true;
                 }
 
-				// Mouse position. Normalized 0 <-> 1
-
-				if(event.event.type == "touchmove"){
-					let absX = event.event.touches[0].pageX
-
-					var obj = canvas;
-					var obj_left = 0;
-				    var obj_top = 0;
-
-					while (obj.offsetParent)
-					{
-						obj_left += obj.offsetLeft;
-						obj_top += obj.offsetTop;
-						obj = obj.offsetParent;
-					}
-					mXpos = event.event.touches[0].pageX - obj_left;
-					mYpos = event.event.touches[0].pageY -  obj_top;
-				}else{
-					mXpos = event.event.offsetX;
-					mYpos = event.event.offsetY;
-				}
-
-                var normalX = map(mXpos, 0, canvasInnerSize, 0, 1)
-                var normalY = map(mYpos, 0, canvasInnerSize, 0, 1)
+				var normalX = map(event.point.x, 0, canvasInnerSize, 0, 1)
+                var normalY = map(event.point.y, 0, canvasInnerSize, 0, 1)
 
                 if(normalX != prevX || normalY != prevY){
                     // Evito dibujar si el mouse no se movio
@@ -489,7 +523,9 @@ function InitPaper(){
                     prevX = normalX;
                     prevY = normalY;
                 } // if(normalX != prevX || normalY != prevY)
+
             }
+
         }
         tool.onMouseUp = function(event){
             ws.send(JSON.stringify({action:"lineend"}))
@@ -510,8 +546,7 @@ window.onload = function() {
 	InitSocket();
 	InitPaper();
 
-	isDomReady = true;
-	EstaReady();
+	isLoaded.dom = true;
 }
 
 function map(x, in_min, in_max, out_min, out_max)

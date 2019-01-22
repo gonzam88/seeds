@@ -32,8 +32,8 @@ body {
 	font-family: 'Space Mono', monospace;
 	overflow: hidden;
     max-height: 100vh;
-    background-color: #6e4fe0;
-    color: #96caf7;
+    background-color: #e2e2e2;
+    color: #6e4fe0;
     line-height: 20px;
 }
 
@@ -134,6 +134,21 @@ a{
 	text-align: center;
 	z-index: 30;
 }
+
+#serverOff{
+	background-color: #e2e2e2;
+	position: absolute;
+	top: 0;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	text-align: center;
+	z-index: 999;
+}
+
 #loadingUi img{
 	width: 30px;
     margin-top: 20px;
@@ -260,6 +275,8 @@ button:hover{
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
+	background-color: #4e4e4e;
+	z-index: -100;
 }
 #playersQueue div{
 	text-align: center;
@@ -273,7 +290,6 @@ button:hover{
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-
 
 .soyyo{
 	text-decoration: underline;
