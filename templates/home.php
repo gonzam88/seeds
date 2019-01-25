@@ -127,7 +127,7 @@ if($seg == "prev"){
     </div>
 
 	<div id="serverOff" class="hide">
-		<p><?php _t("Server is currently off"); ?> 🤬<p>
+		<p><?php _t("Server is currently off"); ?> 🙈<p>
 	</div>
 
     <div id="restart" class="hide">
