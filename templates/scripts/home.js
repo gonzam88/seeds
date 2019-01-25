@@ -431,9 +431,12 @@ function InitSocket(){
         if (ws.readyState === ws.OPEN) {
             let msg = {
                 action: "login",
-                nickname: login.nickname
+                nickname: login.nickname,
+                role: "player"
             };
             ws.send(JSON.stringify(msg));
+            console.log("msg")
+            console.log(ws)
         }
     })
 }
