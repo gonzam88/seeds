@@ -21,7 +21,7 @@ function _t($label) {
     => 'Cuando sea tu turno, dibujá sobre el video. Eventualmente será dibujado IRL',
     'you draw now!'         => 'dibujas vos!',
 	'Loading'				=> 'Cargando',
-	'Server is currently off'=> 'El servidor se encuentra apagado'
+	'Server is currently off'=> 'El servidor está apagado'
 
   );
   echo isset($labels[$label]) ? $labels[$label] : $label;
