@@ -121,8 +121,8 @@ if($seg == "prev"){
         </div>
     </div>
 
-	<div id="loadingUi" class="">
-        <p><?php _t("Loading") ?> ({{loadedElements}}/{{totalElements}})...<p>
+	<div id="loadingUi" class="" v-cloak >
+        <p v-cloak> <?php _t("Loading") ?> ({{loadedElements}}/{{totalElements}})...<p>
 		<img src="<?php echo $config->urls->templates; ?>loading.svg">
     </div>
 
